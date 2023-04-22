@@ -95,10 +95,10 @@ namespace CUE4Parse.UE4.Objects.Engine
             MaskG = Ar.Read<int>();
             MaskB = Ar.Read<int>();
             MaskA = Ar.Read<int>();
-            // if (Ar.Owner.HasFlags(EPackageFlags.PKG_FilterEditorOnly))
-            // {
-            //     ExpressionName = Ar.ReadFName();
-            // }
+            if (Ar.Owner.HasFlags(EPackageFlags.PKG_FilterEditorOnly) && Ar.Game <= EGame.GAME_UE5_1)
+            {
+                ExpressionName = Ar.ReadFName();
+            }
         }
     }
 

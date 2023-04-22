@@ -62,6 +62,8 @@ namespace CUE4Parse.UE4.IO.Objects
             {
                 ImportedPackageNamesOffset = Ar.Read<int>();
             }
+
+            ImportedPackageNamesOffset = -1;
         }
     }
 }
