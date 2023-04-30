@@ -1,5 +1,6 @@
 ﻿using System;
 using CUE4Parse.UE4.Assets.Exports.Animation;
+using CUE4Parse.UE4.Assets.Exports.Mesh;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Objects.Engine;
@@ -9,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace CUE4Parse.UE4.Assets.Exports.SkeletalMesh
 {
-    public class USkeletalMesh : UObject
+    public class USkeletalMesh : UObject, IMesh
     {
         public FBoxSphereBounds ImportedBounds { get; private set; }
         public FSkeletalMaterial[] SkeletalMaterials { get; private set; }

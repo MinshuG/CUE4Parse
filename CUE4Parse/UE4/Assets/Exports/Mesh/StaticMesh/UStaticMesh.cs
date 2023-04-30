@@ -1,4 +1,5 @@
 using System;
+using CUE4Parse.UE4.Assets.Exports.Mesh;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Objects.Core.Misc;
@@ -10,7 +11,7 @@ using Serilog;
 
 namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
 {
-    public class UStaticMesh : UObject
+    public class UStaticMesh : UObject, IMesh
     {
         public bool bCooked { get; private set; }
         public FPackageIndex BodySetup { get; private set; }

@@ -129,8 +129,9 @@ namespace CUE4Parse.UE4.Objects.Engine
             LevelScriptActor = new FPackageIndex(Ar);
             NavListStart = new FPackageIndex(Ar);
             NavListEnd = new FPackageIndex(Ar);
-            PrecomputedVisibilityHandler = new FPrecomputedVisibilityHandler(Ar);
-            PrecomputedVolumeDistanceField = new FPrecomputedVolumeDistanceField(Ar);
+            // PrecomputedVisibilityHandler = new FPrecomputedVisibilityHandler(Ar);
+            // PrecomputedVolumeDistanceField = new FPrecomputedVolumeDistanceField(Ar);
+            Ar.Position = validPos; // 👍
         }
 
         protected internal override void WriteJson(JsonWriter writer, JsonSerializer serializer)
@@ -158,11 +159,11 @@ namespace CUE4Parse.UE4.Objects.Engine
             writer.WritePropertyName("NavListEnd");
             serializer.Serialize(writer, NavListEnd);
 
-            writer.WritePropertyName("PrecomputedVisibilityHandler");
-            serializer.Serialize(writer, PrecomputedVisibilityHandler);
-
-            writer.WritePropertyName("PrecomputedVolumeDistanceField");
-            serializer.Serialize(writer, PrecomputedVolumeDistanceField);
+            // writer.WritePropertyName("PrecomputedVisibilityHandler");
+            // serializer.Serialize(writer, PrecomputedVisibilityHandler);
+            //
+            // writer.WritePropertyName("PrecomputedVolumeDistanceField");
+            // serializer.Serialize(writer, PrecomputedVolumeDistanceField);
         }
     }
 }
