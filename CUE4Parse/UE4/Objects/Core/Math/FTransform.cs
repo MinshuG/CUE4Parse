@@ -73,6 +73,11 @@ namespace CUE4Parse.UE4.Objects.Core.Math
             Translation = data.GetOrDefault<FVector>(nameof(Translation));
             Scale3D = data.GetOrDefault<FVector>(nameof(Scale3D));
         }
+        
+        public FTransform(FMatrix m)
+        {
+            SetFromMatrix(m);
+        }
 
         public void SetFromMatrix(FMatrix inMatrix)
         {
