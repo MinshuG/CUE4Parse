@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using CUE4Parse.Encryption.Aes;
-using CUE4Parse.MappingsProvider;
+using CUE4Parse.FileProvider.Objects;
 using CUE4Parse.UE4.Exceptions;
 using CUE4Parse.UE4.IO;
 using CUE4Parse.UE4.IO.Objects;
 using CUE4Parse.UE4.Objects.Core.Misc;
+using CUE4Parse.UE4.Readers;
 using CUE4Parse.UE4.Versions;
-using CUE4Parse.UE4.Vfs;
+using CUE4Parse.UE4.VirtualFileCache;
+using CUE4Parse.UE4.VirtualFileCache.Manifest;
+using CUE4Parse.UE4.VirtualFileSystem;
 using CUE4Parse.Utils;
 
 namespace CUE4Parse.FileProvider.Vfs
@@ -163,6 +167,33 @@ namespace CUE4Parse.FileProvider.Vfs
             }
 
             return countNewMounts;
+        }
+
+        public int LoadVirtualCache()
+        {
+            var persistentDownloadDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), GameName, "Saved/PersistentDownloadDir");
+            if (!Directory.Exists(persistentDownloadDir)) return 0;
+
+            var vfcMetadata = Path.Combine(persistentDownloadDir, "VFC", "vfc.meta");
+            var cachedManifest = new DirectoryInfo(Path.Combine(persistentDownloadDir, "ManifestCache")).GetFiles("*.manifest");
+            if (!File.Exists(vfcMetadata) || cachedManifest.Length <= 0)
+                return 0;
+
+            var vfc = new FFileTable(new FByteArchive("vfc.meta", File.ReadAllBytes(vfcMetadata)));
+            var manifest = new OptimizedContentBuildManifest(File.ReadAllBytes(cachedManifest[0].FullName));
+
+            var onDemandFiles = new Dictionary<string, GameFile>();
+            foreach ((var vfcHash, var dataReference) in vfc.FileMap)
+            {
+                if (!manifest.HashNameMap.TryGetValue(vfcHash.ToString(), out var filePath)) continue;
+
+                var onDemandFile = new VfcGameFile(vfc.BlockFiles, dataReference, persistentDownloadDir, filePath, Versions);
+                if (IsCaseInsensitive) onDemandFiles[onDemandFile.Path.ToLowerInvariant()] = onDemandFile;
+                else onDemandFiles[onDemandFile.Path] = onDemandFile;
+            }
+
+            _files.AddFiles(onDemandFiles);
+            return onDemandFiles.Count;
         }
 
         public void Dispose()
