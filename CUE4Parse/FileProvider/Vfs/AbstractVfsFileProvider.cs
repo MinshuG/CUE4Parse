@@ -49,9 +49,10 @@ namespace CUE4Parse.FileProvider.Vfs
         }
 
         public IEnumerable<IAesVfsReader> UnloadedVfsByGuid(FGuid guid) => _unloadedVfs.Keys.Where(it => it.EncryptionKeyGuid == guid);
+
         public void UnloadAllVfs()
         {
-            _files = new FileProviderDictionary(IsCaseInsensitive);
+            _files.Clear();
             foreach (var reader in _mountedVfs.Keys)
             {
                 _keys.TryRemove(reader.EncryptionKeyGuid, out _);
@@ -59,6 +60,16 @@ namespace CUE4Parse.FileProvider.Vfs
                 _mountedVfs.TryRemove(reader, out _);
                 _unloadedVfs[reader] = null;
             }
+        }
+        public void UnloadNonStreamedVfs()
+        {
+            var onDemandFiles = new Dictionary<string, GameFile>();
+            foreach (var (path, vfs) in _files)
+                if (vfs is StreamedGameFile)
+                    onDemandFiles[path] = vfs;
+
+            UnloadAllVfs();
+            _files.AddFiles(onDemandFiles);
         }
 
         public int Mount() => MountAsync().Result;
@@ -175,12 +186,17 @@ namespace CUE4Parse.FileProvider.Vfs
             if (!Directory.Exists(persistentDownloadDir)) return 0;
 
             var vfcMetadata = Path.Combine(persistentDownloadDir, "VFC", "vfc.meta");
-            var cachedManifest = new DirectoryInfo(Path.Combine(persistentDownloadDir, "ManifestCache")).GetFiles("*.manifest");
-            if (!File.Exists(vfcMetadata) || cachedManifest.Length <= 0)
+            var manifestCacheFolder = new DirectoryInfo(Path.Combine(persistentDownloadDir, "ManifestCache"));
+            if (!File.Exists(vfcMetadata) || !manifestCacheFolder.Exists)
+                return 0;
+
+            var cachedManifest = manifestCacheFolder.GetFiles("*.manifest");
+            if (cachedManifest.Length <= 0)
                 return 0;
 
             var vfc = new FFileTable(new FByteArchive("vfc.meta", File.ReadAllBytes(vfcMetadata)));
-            var manifest = new OptimizedContentBuildManifest(File.ReadAllBytes(cachedManifest[0].FullName));
+            var manifest = new OptimizedContentBuildManifest(
+                File.ReadAllBytes(cachedManifest.OrderBy(f => f.LastWriteTime).Last().FullName));
 
             var onDemandFiles = new Dictionary<string, GameFile>();
             foreach ((var vfcHash, var dataReference) in vfc.FileMap)

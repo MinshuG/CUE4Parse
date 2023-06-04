@@ -89,13 +89,14 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
                 }
                 case Package pak: // ue5?
                 {
-                    foreach (var import in pak.ImportMap)
+                    for (var i = 0; i < pak.ImportMap.Length; i++)
                     {
-                        if (!import.ClassName.Text.StartsWith("Texture", StringComparison.OrdinalIgnoreCase) ||
-                            !import.OuterIndex.TryLoad(out UTexture tex)) continue;
+                        if (!pak.ImportMap[i].ClassName.Text.StartsWith("Texture", StringComparison.OrdinalIgnoreCase)) continue;
+                        var resolved = pak.ResolvePackageIndex(new FPackageIndex(Ar, -i - 1));
+                        if (resolved?.Class == null || !resolved.TryLoad(out var tex) || tex is not UTexture texture) continue;
 
-                        _displayedReferencedTextures.Add(import);
-                        ReferencedTextures.Add(tex);
+                        _displayedReferencedTextures.Add(resolved);
+                        ReferencedTextures.Add(texture);                     
                     }
                     break;
                 }

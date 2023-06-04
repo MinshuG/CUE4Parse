@@ -20,14 +20,14 @@ namespace CUE4Parse.UE4.IO.Objects
         public EZenPackageVersion ZenVersion;
         public FPackageFileVersion PackageVersion;
         public int LicenseeVersion;
-        public FCustomVersion[] CustomVersions;
+        public FCustomVersionContainer CustomVersions;
 
         public FZenPackageVersioningInfo(FArchive Ar)
         {
             ZenVersion = Ar.Read<EZenPackageVersion>();
             PackageVersion = Ar.Read<FPackageFileVersion>();
             LicenseeVersion = Ar.Read<int>();
-            CustomVersions = Ar.ReadArray<FCustomVersion>();
+            CustomVersions = new FCustomVersionContainer(Ar);
         }
     }
 
@@ -43,6 +43,8 @@ namespace CUE4Parse.UE4.IO.Objects
         public readonly int ExportMapOffset;
         public readonly int ExportBundleEntriesOffset;
         public readonly int GraphDataOffset;
+        public readonly int DependencyBundleHeadersOffset;
+        public readonly int DependencyBundleEntriesOffset;
         public readonly int ImportedPackageNamesOffset;
 
         public FZenPackageSummary(FArchive Ar)
@@ -56,10 +58,12 @@ namespace CUE4Parse.UE4.IO.Objects
             ImportMapOffset = Ar.Read<int>();
             ExportMapOffset = Ar.Read<int>();
             ExportBundleEntriesOffset = Ar.Read<int>();
-            GraphDataOffset = Ar.Read<int>();
+            GraphDataOffset = Ar.Game < EGame.GAME_UE5_3 ? Ar.Read<int>() : 0;
 
             if (Ar.Game >= EGame.GAME_UE5_3)
             {
+                DependencyBundleHeadersOffset = Ar.Read<int>();
+                DependencyBundleEntriesOffset = Ar.Read<int>();
                 ImportedPackageNamesOffset = Ar.Read<int>();
             }
 

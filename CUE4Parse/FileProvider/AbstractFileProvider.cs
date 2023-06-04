@@ -40,8 +40,8 @@ namespace CUE4Parse.FileProvider
         public abstract IReadOnlyDictionary<string, GameFile> Files { get; }
         public abstract IReadOnlyDictionary<FPackageId, GameFile> FilesById { get; }
         public virtual bool IsCaseInsensitive { get; } // fabian? is this reversed?
-        public bool ReadScriptData { get; set; } = false;
-        public virtual bool UseLazySerialization { get; set; } = true;
+        public bool ReadScriptData { get; set; }
+        public bool UseLazySerialization { get; set; } = true;
 
         protected AbstractFileProvider(bool isCaseInsensitive = false, VersionContainer? versions = null)
         {
@@ -103,7 +103,7 @@ namespace CUE4Parse.FileProvider
             {
                 if (string.IsNullOrEmpty(_gameName))
                 {
-                    string t = Files.Keys.FirstOrDefault(it => !it.SubstringBefore('/').EndsWith("engine", StringComparison.OrdinalIgnoreCase) && !it.StartsWith('/')) ?? string.Empty;
+                    string t = Files.Keys.FirstOrDefault(it => !it.SubstringBefore('/').EndsWith("engine", StringComparison.OrdinalIgnoreCase) && !it.StartsWith('/') && it.Contains('/')) ?? string.Empty;
                     _gameName = t.SubstringBefore('/');
                 }
                 return _gameName;
