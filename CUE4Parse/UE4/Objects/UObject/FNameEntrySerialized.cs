@@ -1,14 +1,41 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using CUE4Parse.UE4.Readers;
 using CUE4Parse.UE4.Versions;
+using Newtonsoft.Json;
 
 namespace CUE4Parse.UE4.Objects.UObject
 {
     public readonly struct FNameEntrySerialized
     {
-        public readonly string? Name;
+        private readonly string? _name;
+        private static Dictionary<string, string> _pubgHashMap2 = null!;
+        public string? Name {
+            get {
+                if (_pubgHashMap2 == null) {
+                    var assembly = Assembly.GetEntryAssembly();
+                    using Stream? stream = assembly!.GetManifestResourceStream($"{assembly?.GetName().Name}.PUBGNameHashMap.json");
+                    if (stream != null) {
+                        using StreamReader reader = new StreamReader(stream);
+                        _pubgHashMap2 = JsonConvert.DeserializeObject<Dictionary<string, string>>(reader.ReadToEnd()) ?? new Dictionary<string, string>();
+                    }
+                    else {
+                        _pubgHashMap2 = new Dictionary<string, string>();
+                    }
+                }
+
+                if (_name != null && _pubgHashMap2.TryGetValue(_name, out var name))
+                {
+                    return name;
+                }
+                return _name;
+            }
+            private init => _name = value;
+        }
 #if NAME_HASHES
         public readonly ushort NonCasePreservingHash;
         public readonly ushort CasePreservingHash;
