@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using CUE4Parse.Compression;
 using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Texture;
@@ -489,6 +490,26 @@ namespace CUE4Parse.UE4.Readers
             value = ((value << 8) & 0xFF00FF00FF00FF00UL) | ((value >> 8) & 0x00FF00FF00FF00FFUL);
             value = ((value << 16) & 0xFFFF0000FFFF0000UL) | ((value >> 16) & 0x0000FFFF0000FFFFUL);
             return (value << 32) | (value >> 32);
+        }
+
+        public void DumpBytesToHex(int size, int maxBytesPerLine = 16) {
+#if DEBUG
+            var savePos = Position;
+            var bytes = ReadBytes(size);
+            Position = savePos;
+            
+            var sb = new StringBuilder();
+            for (var i = 0; i < bytes.Length; i++) {
+                if (i % maxBytesPerLine == 0) {
+                    sb.Append($"{i+Position:X8} ");
+                }
+                sb.Append($"{bytes[i]:X2} ");
+                if (i % maxBytesPerLine == maxBytesPerLine - 1) {
+                    sb.AppendLine();
+                }
+            }
+            Console.Write(sb.ToString());
+#endif
         }
 
         public abstract object Clone();

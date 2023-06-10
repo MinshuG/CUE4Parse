@@ -13,7 +13,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
         public override void Deserialize(FAssetArchive Ar, long validPos)
         {
             base.Deserialize(Ar, validPos);
-
+            return;
             ClusterTree = FReleaseObjectVersion.Get(Ar) < FReleaseObjectVersion.Type.HISMCClusterTreeMigration ? Ar.ReadBulkArray(() => new FClusterNode_DEPRECATED(Ar)) : Ar.ReadBulkArray(() => new FClusterNode(Ar));
         }
 
@@ -48,8 +48,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
         public int FirstInstance;
         public int LastInstance;
 
-        public FClusterNode_DEPRECATED(FArchive Ar)
-        {
+        public FClusterNode_DEPRECATED(FArchive Ar) {
             BoundMin = Ar.Read<FVector>();
             FirstChild = Ar.Read<int>();
             BoundMax = Ar.Read<FVector>();

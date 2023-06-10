@@ -12,6 +12,13 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
         {
             base.Deserialize(Ar, validPos);
             LODData = Ar.ReadArray(() => new FStaticMeshComponentLODInfo(Ar));
+            // Ar.DumpBytesToHex(80);
+
+            if (Ar.Owner.Provider?.GameName.ToLower() == "fortnitegame") {
+                if (Ar.ReadBoolean()) {
+                    Ar.Position += 0x40-4;
+                }
+            }
         }
 
         public FPackageIndex GetStaticMesh()

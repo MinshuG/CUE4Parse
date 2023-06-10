@@ -12,18 +12,15 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
         public override void Deserialize(FAssetArchive Ar, long validPos)
         {
             base.Deserialize(Ar, validPos);
-            if (Ar.Owner.Provider?.GameName.ToLower() == "FortniteGame".ToLower())
-            {
-                return;
-            }
-
+             // just skip till 01 00 00 00 80 00 00 00 (bCooked and sizeof(PerInstanceSMData->FMatrix))
+            // Ar.DumpBytesToHex(16*2);
             var bCooked = false;
             if (FFortniteMainBranchObjectVersion.Get(Ar) >= FFortniteMainBranchObjectVersion.Type.SerializeInstancedStaticMeshRenderData ||
                 FEditorObjectVersion.Get(Ar) >= FEditorObjectVersion.Type.SerializeInstancedStaticMeshRenderData)
             {
                 bCooked = Ar.ReadBoolean();
             }
-
+            // Ar.DumpBytesToHex(16*2*10);
             PerInstanceSMData = Ar.ReadBulkArray(() => new FInstancedStaticMeshInstanceData(Ar));
 
             if (FRenderingObjectVersion.Get(Ar) >= FRenderingObjectVersion.Type.PerInstanceCustomData)
