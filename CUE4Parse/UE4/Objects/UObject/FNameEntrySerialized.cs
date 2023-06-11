@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices;
 using System.Text;
 using CUE4Parse.UE4.Readers;
@@ -12,30 +13,9 @@ namespace CUE4Parse.UE4.Objects.UObject
 {
     public readonly struct FNameEntrySerialized
     {
-        private readonly string? _name;
-        private static Dictionary<string, string> _pubgHashMap2 = null!;
-        public string? Name {
-            get {
-                if (_pubgHashMap2 == null) {
-                    var assembly = Assembly.GetEntryAssembly();
-                    using Stream? stream = assembly!.GetManifestResourceStream($"{assembly?.GetName().Name}.PUBGNameHashMap.json");
-                    if (stream != null) {
-                        using StreamReader reader = new StreamReader(stream);
-                        _pubgHashMap2 = JsonConvert.DeserializeObject<Dictionary<string, string>>(reader.ReadToEnd()) ?? new Dictionary<string, string>();
-                    }
-                    else {
-                        _pubgHashMap2 = new Dictionary<string, string>();
-                    }
-                }
+        public readonly string? Name;
+        private static Dictionary<string, string>? _pubgNameMap;
 
-                if (_name != null && _pubgHashMap2.TryGetValue(_name, out var name))
-                {
-                    return name;
-                }
-                return _name;
-            }
-            private init => _name = value;
-        }
 #if NAME_HASHES
         public readonly ushort NonCasePreservingHash;
         public readonly ushort CasePreservingHash;
@@ -45,6 +25,20 @@ namespace CUE4Parse.UE4.Objects.UObject
             var bHasNameHashes = Ar.Ver >= EUnrealEngineObjectUE4Version.NAME_HASHES_SERIALIZED || Ar.Game == EGame.GAME_GearsOfWar4;
 
             Name = Ar.ReadFString().Trim();
+
+            if (Ar.Game == EGame.GAME_PlayerUnknownsBattlegrounds)
+            {
+                if (_pubgNameMap == null)
+                {
+                    using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("CUE4Parse.Resources.PUBGNameHashMap.json");
+                    if (stream == null) throw new MissingManifestResourceException("Couldn't find PUBGNameHashMap.json in Embedded Resources");
+                    using StreamReader reader = new(stream);
+                    _pubgNameMap = JsonConvert.DeserializeObject<Dictionary<string, string>>(reader.ReadToEnd()) ?? new Dictionary<string, string>();
+                }
+
+                if (Name != null && _pubgNameMap.TryGetValue(Name, out var name)) Name = name;
+            }
+
             if (bHasNameHashes)
             {
 #if NAME_HASHES
