@@ -11,6 +11,8 @@ using CUE4Parse_Conversion.Animations;
 using CUE4Parse_Conversion.Materials;
 using CUE4Parse_Conversion.Meshes;
 using CUE4Parse_Conversion.Textures;
+using CUE4Parse_Conversion.UnrealFormat;
+using CUE4Parse_Conversion.Worlds;
 
 namespace CUE4Parse_Conversion
 {
@@ -18,21 +20,27 @@ namespace CUE4Parse_Conversion
     {
         public ELodFormat LodFormat;
         public EMeshFormat MeshFormat;
+        public EAnimFormat AnimFormat;
         public EMaterialFormat MaterialFormat;
         public ETextureFormat TextureFormat;
+        public EWorldFormat WorldFormat;
         public ETexturePlatform Platform;
         public ESocketFormat SocketFormat;
         public bool ExportMorphTargets;
+        public EFileCompressionFormat CompressionFormat;
 
         public ExporterOptions()
         {
             LodFormat = ELodFormat.FirstLod;
             MeshFormat = EMeshFormat.ActorX;
+            AnimFormat = EAnimFormat.ActorX;
             MaterialFormat = EMaterialFormat.AllLayersNoRef;
             TextureFormat = ETextureFormat.Png;
             Platform = ETexturePlatform.DesktopMobile;
             SocketFormat = ESocketFormat.Bone;
+            WorldFormat = EWorldFormat.Unreal;
             ExportMorphTargets = true;
+            CompressionFormat = EFileCompressionFormat.None;
         }
     }
 
