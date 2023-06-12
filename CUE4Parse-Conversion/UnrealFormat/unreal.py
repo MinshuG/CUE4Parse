@@ -4,6 +4,7 @@ import os
 import io
 import time
 import gzip
+import zstd
 from mathutils import Vector, Matrix, Quaternion, Euler
 from math import *
 
@@ -45,7 +46,7 @@ class FArchiveReader:
 		return self.data.read(self.size - self.data.tell())
 
 	def read_bool(self):
-			return struct.unpack("?", self.data.read(1))[0]
+		return struct.unpack("?", self.data.read(1))[0]
 
 	def read_string(self, size: int):
 		string =  self.data.read(size)
@@ -189,11 +190,11 @@ class Actor:
 MAGIC = "UNREALFORMAT"
 MESH_INDENTIFIER = "UMODEL"
 WORLD_INDENTIFIER = "UWORLD"
-WORLD_INDENTIFIER = "UANIM"
+ANIM_INDENTIFIER = "UANIM"
 
 def main():
 	start = time.perf_counter()
-	import_file("D:/Exports/Fortnite/Game/Maps/UI/Frontend_Lobby_Winter_2020_C.uworld")
+	import_file("D:/Exports/Fortnite/Game/Maps/UI/Frontend_Lobby_StW_Season10.uworld")
 	end = time.perf_counter()
 	Log.write(f"Took {str(round(end - start, 3))}s")
 
@@ -205,7 +206,7 @@ def import_data(data, link_model: bool = True):
 	with FArchiveReader(data) as ar:
 		magic = ar.read_string(len(MAGIC))
 		if magic != MAGIC:
-			return None
+			return
 
 		identifier = ar.read_fstring()
 		file_version = ar.read_int()
@@ -213,7 +214,6 @@ def import_data(data, link_model: bool = True):
 		Log.write(f"Importing {object_name}")
 
 		read_archive = ar
-
 		is_compressed = ar.read_bool()
 		if is_compressed:
 			compression_type = ar.read_fstring()
@@ -221,8 +221,11 @@ def import_data(data, link_model: bool = True):
 
 			if compression_type == "GZIP":
 				read_archive = FArchiveReader(gzip.decompress(ar.read_to_end()))
+			elif compression_type == "ZSTD":
+				read_archive = FArchiveReader(zstd.ZSTD_uncompress(ar.read_to_end()))
 			else:
-				Log.write("Unknown Compression Type: {compression_type}")
+				Log.write(f"Unknown Compression Type: {compression_type}")
+				return
 
 
 		if identifier == MESH_INDENTIFIER:

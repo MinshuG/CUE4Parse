@@ -38,7 +38,5 @@ public class FUnrealHeader
         {
             Ar.WriteFString(CompressionFormat.ToString());
         }
-        
-        
     }
 }

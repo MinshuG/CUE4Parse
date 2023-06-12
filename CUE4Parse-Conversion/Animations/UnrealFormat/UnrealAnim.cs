@@ -7,7 +7,8 @@ public class UnrealAnim : ExportableUnrealAssetBase
 {
     public UnrealAnim(string name, ExporterOptions options)
     {
-        Header = new FUnrealHeader("UANIM", 1, name, options.CompressionFormat);
+        Options = options;
+        Header = new FUnrealHeader("UANIM", 1, name, Options.CompressionFormat);
     }
 
     public UnrealAnim(UAnimSequence anim, string name, ExporterOptions options) : this(name, options)

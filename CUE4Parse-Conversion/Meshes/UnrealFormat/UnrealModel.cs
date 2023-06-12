@@ -14,7 +14,8 @@ public class UnrealModel : ExportableUnrealAssetBase
 {
     private UnrealModel(string name, ExporterOptions options)
     {
-        Header = new FUnrealHeader("UMODEL", 1, name, options.CompressionFormat);
+        Options = options;
+        Header = new FUnrealHeader("UMODEL", 1, name, Options.CompressionFormat);
     }
     
     public UnrealModel(CStaticMeshLod lod, string name, ExporterOptions options) : this(name, options) 

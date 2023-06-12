@@ -3,5 +3,6 @@
 public enum EFileCompressionFormat
 {
     None,
-    GZIP
+    GZIP,
+    ZSTD
 }

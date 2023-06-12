@@ -19,7 +19,8 @@ public class UnrealWorld : ExportableUnrealAssetBase
 
     public UnrealWorld(string name, ExporterOptions options)
     {
-        Header = new FUnrealHeader("UWORLD", 1, name, options.CompressionFormat);
+        Options = options;
+        Header = new FUnrealHeader("UWORLD", 1, name, Options.CompressionFormat);
     }
     
     public UnrealWorld(UWorld world, string name, ExporterOptions options) : this(name, options)
@@ -75,7 +76,7 @@ public class UnrealWorld : ExportableUnrealAssetBase
         var hash = staticMesh.GetPathName().GetHashCode();
         if (!MeshMap.ContainsKey(hash) && staticMesh.TryConvert(out var convertedMesh))
         {
-            MeshMap[staticMesh.GetPathName().GetHashCode()] = new UnrealModel(convertedMesh.LODs.First(), staticMesh.Name, default);
+            MeshMap[staticMesh.GetPathName().GetHashCode()] = new UnrealModel(convertedMesh.LODs.First(), staticMesh.Name, Options with { CompressionFormat = EFileCompressionFormat.None });
         }
 
         var position = staticMeshComponent.GetOrDefault("RelativeLocation", FVector.ZeroVector) + positionOffset;
