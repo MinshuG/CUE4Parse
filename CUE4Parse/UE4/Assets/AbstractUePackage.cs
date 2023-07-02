@@ -62,8 +62,10 @@ namespace CUE4Parse.UE4.Assets
         {
             var serialOffset = Ar.Position;
             var validPos = serialOffset + serialSize;
+#if !DONT_HANDLE_SERIALIZATION_EXCEPTIONS
             try
             {
+#endif
                 obj.Deserialize(Ar, validPos);
 #if DEBUG
                 var remaining = validPos - Ar.Position;
@@ -81,6 +83,7 @@ namespace CUE4Parse.UE4.Assets
                         break;
                 }
 #endif
+#if !DONT_HANDLE_SERIALIZATION_EXCEPTIONS
             }
             catch (Exception e)
             {
@@ -91,6 +94,7 @@ namespace CUE4Parse.UE4.Assets
 
                 Log.Error(e, "Could not read {0} correctly", obj.ExportType);
             }
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

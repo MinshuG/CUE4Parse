@@ -324,8 +324,9 @@ namespace CUE4Parse.UE4.Assets.Exports.Nanite
             {
                 ResourceFlags = Ar.Read<uint>();
                 StreamablePages = new FByteBulkData(Ar);
-
-                var nanite = new FByteArchive("PackedCluster", Ar.ReadArray<byte>(), Ar.Versions);
+                
+                Ar.SkipFixedArray(sizeof(byte));
+                // var nanite = new FByteArchive("PackedCluster", Ar.ReadArray<byte>(), Ar.Versions);
 
                 PageStreamingStates = Ar.ReadArray<FPageStreamingState>();
                 HierarchyNodes = Ar.ReadArray(() => new FPackedHierarchyNode(Ar));
@@ -343,8 +344,8 @@ namespace CUE4Parse.UE4.Assets.Exports.Nanite
 
                 if (PageStreamingStates.Length > 0)
                 {
-                    nanite.Position = PageStreamingStates[0].BulkOffset;
-                    RootData = new FNaniteStreamableData(nanite, NumRootPages, PageStreamingStates[0].PageSize);
+                    // nanite.Position = PageStreamingStates[0].BulkOffset;
+                    // RootData = new FNaniteStreamableData(nanite, NumRootPages, PageStreamingStates[0].PageSize);
                 }
             }
         }

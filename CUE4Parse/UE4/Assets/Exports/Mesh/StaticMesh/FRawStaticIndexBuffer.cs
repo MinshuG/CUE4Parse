@@ -14,7 +14,19 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
             Indices16 = Array.Empty<ushort>();
             Indices32 = Array.Empty<uint>();
         }
-
+        
+        public FRawStaticIndexBuffer(uint[] indices32)
+        {
+            Indices16 = Array.Empty<ushort>();
+            Indices32 = indices32;
+        }
+        
+        public FRawStaticIndexBuffer(ushort[] indices16)
+        {
+            Indices16 = indices16;
+            Indices32 = Array.Empty<uint>();
+        }
+        
         public FRawStaticIndexBuffer(FArchive Ar) : this()
         {
             if (Ar.Ver < EUnrealEngineObjectUE4Version.SUPPORT_32BIT_STATIC_MESH_INDICES)

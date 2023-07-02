@@ -258,17 +258,17 @@ namespace CUE4Parse_Conversion.Meshes
         public static (VertexColorXTextureX, VertexColorXTextureX, VertexColorXTextureX) PrepareUVsAndTexCoords(
             CBaseMeshLod lod, CMeshVertex vert1, CMeshVertex vert2, CMeshVertex vert3, int[] indices)
         {
-            return PrepareUVsAndTexCoords(lod.VertexColors ?? new FColor[lod.NumVerts], vert1, vert2, vert3,
+            return PrepareUVsAndTexCoords(lod.VertexColors, vert1, vert2, vert3,
                 lod.ExtraUV.Value, indices);
         }
 
         public static (VertexColorXTextureX, VertexColorXTextureX, VertexColorXTextureX) PrepareUVsAndTexCoords(
-            FColor[] colors, CMeshVertex vert1, CMeshVertex vert2, CMeshVertex vert3, FMeshUVFloat[][] uvs, int[] indices)
+            FColor[]? colors, CMeshVertex vert1, CMeshVertex vert2, CMeshVertex vert3, FMeshUVFloat[][] uvs, int[] indices)
         {
             var (uvs1, uvs2, uvs3) = PrepareUVs(vert1, vert2, vert3, uvs, indices);
-            var c1 = new VertexColorXTextureX((Vector4)colors[indices[0]]/255, uvs1);
-            var c2 = new VertexColorXTextureX((Vector4)colors[indices[1]]/255, uvs2);
-            var c3 = new VertexColorXTextureX((Vector4)colors[indices[2]]/255, uvs3);
+            var c1 = new VertexColorXTextureX(colors != null ? (Vector4)colors[indices[0]]/255 : new Vector4(), uvs1);
+            var c2 = new VertexColorXTextureX(colors != null ? (Vector4)colors[indices[1]]/255: new Vector4(), uvs2);
+            var c3 = new VertexColorXTextureX(colors != null ? (Vector4)colors[indices[2]]/255 : new Vector4(), uvs3);
             return (c1, c2, c3);
         }
 

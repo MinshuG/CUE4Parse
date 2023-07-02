@@ -14,7 +14,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
             LODData = Ar.ReadArray(() => new FStaticMeshComponentLODInfo(Ar));
             // Ar.DumpBytesToHex(80);
 
-            if (Ar.Owner.Provider?.GameName.ToLower() == "fortnitegame") {
+            if (Ar.Owner.Provider?.InternalGameName.ToLower() == "fortnitegame") {
                 var read = Ar.Read<uint>();
                 if (read == 1) { // not bool it's a int TODO fix
                     Ar.Position += 0x40-4;

@@ -22,7 +22,13 @@ namespace CUE4Parse_Conversion.Meshes.PSK
         {
             ExtraUV = new Lazy<FMeshUVFloat[][]>(() =>
             {
-                var ret = new FMeshUVFloat[NumTexCoords - 1][];
+                FMeshUVFloat[][] ret;
+                if (NumTexCoords > 0)
+                    ret = new FMeshUVFloat[NumTexCoords - 1][];
+                else
+                {
+                    ret = Array.Empty<FMeshUVFloat[]>();
+                }
                 for (var i = 0; i < ret.Length; i++)
                 {
                     ret[i] = new FMeshUVFloat[NumVerts];
