@@ -15,7 +15,7 @@ public class ULandscapeComponent: UPrimitiveComponent
     public FVector4 HeightmapScaleBias;
     public int WeightmapScaleBias;
     public float WeightmapSubsectionOffset;
-    
+
     public override void Deserialize(FAssetArchive Ar, long validPos)
     {
         base.Deserialize(Ar, validPos);
@@ -31,7 +31,7 @@ public class ULandscapeComponent: UPrimitiveComponent
         
         // throw new NotImplementedException();
     }
-    
+
     public void GetComponentExtent(ref int MinX, ref int MinY, ref int MaxX, ref int MaxY)
     {
         MinX = Math.Min(SectionBaseX, MinX);

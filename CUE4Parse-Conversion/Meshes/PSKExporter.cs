@@ -5,6 +5,7 @@ using System.Linq;
 using CUE4Parse_Conversion.ActorX;
 using CUE4Parse_Conversion.Materials;
 using CUE4Parse_Conversion.Meshes.PSK;
+using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Exports.Animation;
 using CUE4Parse.UE4.Assets.Exports.Material;
 using CUE4Parse.UE4.Assets.Exports.SkeletalMesh;
@@ -16,10 +17,11 @@ using CUE4Parse.UE4.Writers;
 
 namespace CUE4Parse_Conversion.Meshes;
 
+/// <inheritdoc />
 public class PSKExporter: ExporterBase
 {
     public PSKExporter(): base() { }
-    public PSKExporter(USkeleton originalSkeleton, ExporterOptions options) : base(originalSkeleton, options) { }
+    public PSKExporter(UObject obj, ExporterOptions options) : base(obj, options) { }
 
     public void ExportStaticMeshLods(CStaticMeshLod lod, FArchiveWriter Ar, List<MaterialExporter2>? materialExports, FPackageIndex[] sockets)
     {

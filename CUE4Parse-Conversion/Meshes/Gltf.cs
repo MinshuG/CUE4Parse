@@ -305,15 +305,15 @@ namespace CUE4Parse_Conversion.Meshes
 
         public static FVector SwapYZ(FVector vec)
         {
-            var res = new FVector(vec.X, vec.Z, vec.Y);
-            return res;
+            return vec with { Y = vec.Z, Z = vec.Y };
+            // return new FVector(vec.X, vec.Z, vec.Y);;
         }
 
         public static FQuat SwapYZ(FQuat quat) => new (quat.X, quat.Z, quat.Y, quat.W);
 
         public static Vector4 SwapYZAndNormalize(Vector4 vec)
         {
-          return Vector4.Normalize(new Vector4(vec.X, vec.Z, vec.Y, vec.W));
+          return Vector4.Normalize(vec with { Y = vec.Z, Z = vec.Y });
         }
     }
 }

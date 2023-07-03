@@ -1,5 +1,7 @@
 ﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Writers;
 using static CUE4Parse.Utils.TypeConversionUtils;
 
@@ -15,7 +17,7 @@ namespace CUE4Parse.UE4.Objects.Meshes
         {
             U = u;
             V = v;
-        }
+        }        
 
         public void Serialize(FArchiveWriter Ar)
         {

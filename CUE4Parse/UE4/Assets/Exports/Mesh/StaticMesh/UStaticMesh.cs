@@ -11,7 +11,7 @@ using Serilog;
 
 namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
 {
-    public class UStaticMesh : UObject, IMesh
+    public class UStaticMesh : UObject, IMeshMaterial
     {
         public bool bCooked { get; private set; }
         public FPackageIndex BodySetup { get; private set; }

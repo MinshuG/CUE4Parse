@@ -47,8 +47,8 @@ namespace CUE4Parse_Conversion
 
     public abstract class ExporterBase : IExporter
     {
-        protected readonly string PackagePath;
-        protected readonly string ExportName;
+        protected string PackagePath;
+        protected string ExportName;
         public ExporterOptions Options;
 
         protected ExporterBase()

@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace CUE4Parse.UE4.Assets.Exports.SkeletalMesh
 {
-    public class USkeletalMesh : UObject, IMesh
+    public class USkeletalMesh : UObject, IMeshMaterial
     {
         public FBoxSphereBounds ImportedBounds { get; private set; }
         public FSkeletalMaterial[] SkeletalMaterials { get; private set; }

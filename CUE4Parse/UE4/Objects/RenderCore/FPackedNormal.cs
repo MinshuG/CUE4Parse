@@ -1,5 +1,7 @@
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Readers;
 using CUE4Parse.UE4.Versions;
@@ -8,13 +10,26 @@ using Newtonsoft.Json;
 namespace CUE4Parse.UE4.Objects.RenderCore
 {
     [JsonConverter(typeof(FPackedNormalConverter))]
-    public class FPackedNormal
+    [StructLayout(LayoutKind.Explicit)]
+    public struct FPackedNormal
     {
+        [System.Runtime.InteropServices.FieldOffset(0)]
+        private sbyte X;
+        [System.Runtime.InteropServices.FieldOffset(1)]
+        private sbyte Y;
+        [System.Runtime.InteropServices.FieldOffset(2)]
+        private sbyte Z;
+        [System.Runtime.InteropServices.FieldOffset(3)]
+        private sbyte W;
+
+        [System.Runtime.InteropServices.FieldOffset(0)]
         public uint Data;
-        public float X => (Data & 0xFF) / (float) 127.5 - 1;
-        public float Y => ((Data >> 8) & 0xFF) / (float) 127.5 - 1;
-        public float Z => ((Data >> 16) & 0xFF) / (float) 127.5 - 1;
-        public float W => ((Data >> 24) & 0xFF) / (float) 127.5 - 1;
+        
+        // public readonly uint Data;
+        // public float X => (Data & 0xFF) / (float) 127.5 - 1;
+        // public float Y => ((Data >> 8) & 0xFF) / (float) 127.5 - 1;
+        // public float Z => ((Data >> 16) & 0xFF) / (float) 127.5 - 1;
+        // public float W => ((Data >> 24) & 0xFF) / (float) 127.5 - 1;
 
         public FPackedNormal(FArchive Ar)
         {
@@ -30,28 +45,53 @@ namespace CUE4Parse.UE4.Objects.RenderCore
 
         public FPackedNormal(FVector vector)
         {
-            Data = (uint) ((int) (vector.X + 1 * 127.5) + (int) (vector.Y + 1 * 127.5) << 8 + (int) (vector.Z + 1 * 127.5) << 16);
+            // const float Scale = sbyte.MaxValue;
+            X = RescaleToInt8(vector.X); // (sbyte)Math.Clamp(Math.Round(vector.X * Scale), sbyte.MinValue, sbyte.MaxValue);
+            Y = RescaleToInt8(vector.Y); // (sbyte)Math.Clamp(Math.Round(vector.Y * Scale), sbyte.MinValue, sbyte.MaxValue);
+            Z = RescaleToInt8(vector.Z); // (sbyte)Math.Clamp(Math.Round(vector.Z * Scale), sbyte.MinValue, sbyte.MaxValue);
+            W = sbyte.MaxValue;
         }
 
-        public FPackedNormal(FVector4 vector)// is this broken?
+        public FPackedNormal(FVector4 vector) // is this broken?
         {
-            Data = (uint) ((int) (vector.X + 1 * 127.5) + (int) (vector.Y + 1 * 127.5) << 8 + (int) (vector.Z + 1 * 127.5) << 16 + (int) (vector.W + 1 * 127.5) << 24);
+            // const float Scale = sbyte.MaxValue;
+            X = RescaleToInt8(vector.X); //(sbyte)Math.Clamp(Math.Round(vector.X * Scale), sbyte.MinValue, sbyte.MaxValue); // 
+            Y = RescaleToInt8(vector.Y); // (sbyte)Math.Clamp(Math.Round(vector.Y * Scale), sbyte.MinValue, sbyte.MaxValue); // RescaleToInt8(vector.Y);
+            Z = RescaleToInt8(vector.Z); // (sbyte)Math.Clamp(Math.Round(vector.Z * Scale), sbyte.MinValue, sbyte.MaxValue); // RescaleToInt8(vector.Z);
+            W = RescaleToInt8(vector.W); // (sbyte)Math.Clamp(Math.Round(vector.W * Scale), sbyte.MinValue, sbyte.MaxValue); // RescaleToInt8(vector.W);
         }
 
-        public void SetW(float value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float RescaleToFloat(sbyte value) => value * (1.0f / sbyte.MaxValue);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static sbyte RescaleToInt8(float value) => (sbyte) Math.Clamp(Math.Round(value * sbyte.MaxValue), sbyte.MinValue, sbyte.MaxValue);
+
+        public FVector GetFVector()
         {
-            Data = (Data & 0xFFFFFF) | (uint) ((int) Math.Round(value * 127.0f) << 24);
+            return new(RescaleToFloat(X), RescaleToFloat(Y), RescaleToFloat(Z));
         }
-
-        public float GetW()
+        
+        public FVector4 GetFVector4()
         {
-            return (byte) (Data >> 24) / 127.0f;
+            return new(GetFVector(), RescaleToFloat(W));
+        }
+        
+        public Vector3 GetVector3()
+        {
+            return GetFVector();
+        }
+        
+        public Vector4 GetVector4()
+        {
+            var vec4 = GetFVector4();
+            return new Vector4(vec4.X, vec4.Y, vec4.Z, vec4.W);
         }
 
-        public static explicit operator FVector(FPackedNormal packedNormal) => new(packedNormal.X, packedNormal.Y, packedNormal.Z);
-        public static implicit operator FVector4(FPackedNormal packedNormal) => new(packedNormal.X, packedNormal.Y, packedNormal.Z, packedNormal.W);
-        public static explicit operator Vector3(FPackedNormal packedNormal) => new(packedNormal.X, packedNormal.Y, packedNormal.Z);
-        public static implicit operator Vector4(FPackedNormal packedNormal) => new(packedNormal.X, packedNormal.Y, packedNormal.Z, packedNormal.W);
+        public static explicit operator FVector(FPackedNormal packedNormal) => packedNormal.GetFVector();
+        public static implicit operator FVector4(FPackedNormal packedNormal) => packedNormal.GetFVector4();
+        public static explicit operator Vector3(FPackedNormal packedNormal) => packedNormal.GetVector3();
+        public static implicit operator Vector4(FPackedNormal packedNormal) => packedNormal.GetVector4();
 
         public static bool operator ==(FPackedNormal a, FPackedNormal b) => a.Data == b.Data && a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
         public static bool operator !=(FPackedNormal a, FPackedNormal b) => a.Data != b.Data || a.X != b.X || a.Y != b.Y || a.Z != b.Z || a.W != b.W;

@@ -309,7 +309,7 @@ namespace CUE4Parse_Conversion.Meshes
             v.Normal = normal[2];
 
             // new UE3 version - binormal is not serialized and restored in vertex shader
-            if (normal[1] is not null && normal[1].Data != 0)
+            if (normal[1].Data == 0 && normal[1].Data != 0)
             {
                 throw new NotImplementedException();
             }
