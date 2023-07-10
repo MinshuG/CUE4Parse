@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Versions;
@@ -89,15 +90,25 @@ public class FTexturePlatformData
 
             Ar.Position += 4;
         }
-
+        
         Mips = new FTexture2DMipMap[mipCount];
+        var Count = 0;
         for (var i = 0; i < Mips.Length; i++)
         {
             Mips[i] = new FTexture2DMipMap(Ar);
 
             if (Owner is UVolumeTexture or UTextureCube)
                 Mips[i].SizeY *= GetNumSlices();
+
+            // Count++;
+            // if (Mips[i].BulkData.Data != null)
+            //     break; // first mip only thanks. no need to waste memory
+            
         }
+        // trim mips
+
+        var x = Mips.ToList().IndexOf(Mips.First(x => x.BulkData.Data != null));
+        Array.Resize(ref Mips, x+1);
 
         if (Ar.Versions["VirtualTextures"] && Ar.Platform != ETexturePlatform.Playstation) // TODO: Until we figure out how to calculate mipCount properly, VT has to be ignored.
         {

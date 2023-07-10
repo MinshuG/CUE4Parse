@@ -24,6 +24,8 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
         {
             if (!bCooked) return;
 
+            Bounds = new FBoxSphereBounds();
+
             if (Ar.Versions["StaticMesh.KeepMobileMinLODSettingOnDesktop"])
             {
                 var minMobileLODIdx = Ar.Read<int>();
@@ -36,7 +38,7 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
             {
                 var numInlinedLODs = Ar.Read<byte>();
             }
-
+// return;
             if (Ar.Game >= EGame.GAME_UE5_0)
             {
                 NaniteResources = new FNaniteResources(Ar);

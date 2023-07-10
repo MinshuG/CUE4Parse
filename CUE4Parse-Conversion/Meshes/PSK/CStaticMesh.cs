@@ -7,13 +7,13 @@ namespace CUE4Parse_Conversion.Meshes.PSK
     {
         public List<CStaticMeshLod> LODs;
         public FBox BoundingBox;
-        public FSphere BoundingSphere;
+        public FSphere BoundingSphere = null!;
 
         public CStaticMesh()
         {
             LODs = new List<CStaticMeshLod>();
         }
-        
+
         public void FinalizeMesh()
         {
             foreach (var levelOfDetail in LODs)

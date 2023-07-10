@@ -63,6 +63,11 @@ namespace CUE4Parse.UE4.Readers
             return result;
         }
 
+        public virtual T ReadAt<T> (int offset) where T : unmanaged
+        {
+            return Unsafe.ReadUnaligned<T>(ref _data[offset]);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override unsafe void Serialize(byte* ptr, int length)
         {

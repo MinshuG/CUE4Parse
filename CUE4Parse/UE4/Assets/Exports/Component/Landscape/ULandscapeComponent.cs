@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
 using CUE4Parse.UE4.Assets.Exports.Texture;
+using CUE4Parse.UE4.Assets.Objects;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.Core.Math;
+using CUE4Parse.UE4.Objects.UObject;
 
 namespace CUE4Parse.UE4.Assets.Exports.Component.Landscape;
 
@@ -13,8 +16,9 @@ public class ULandscapeComponent: UPrimitiveComponent
     public int SubsectionSizeQuads;
     public int NumSubsections;
     public FVector4 HeightmapScaleBias;
-    public int WeightmapScaleBias;
+    public FVector4 WeightmapScaleBias;
     public float WeightmapSubsectionOffset;
+    public FWeightmapLayerAllocationInfo[] WeightmapLayerAllocations;
 
     public override void Deserialize(FAssetArchive Ar, long validPos)
     {
@@ -25,28 +29,31 @@ public class ULandscapeComponent: UPrimitiveComponent
         SubsectionSizeQuads = GetOrDefault(nameof(SubsectionSizeQuads), 0);
         NumSubsections = GetOrDefault(nameof(NumSubsections), 1);
         HeightmapScaleBias = GetOrDefault(nameof(HeightmapScaleBias), new FVector4(0, 0, 0, 0));
-        WeightmapScaleBias = GetOrDefault(nameof(WeightmapScaleBias), 0);
+        WeightmapScaleBias = GetOrDefault(nameof(WeightmapScaleBias), new FVector4(0, 0, 0, 0));
         WeightmapSubsectionOffset = GetOrDefault(nameof(WeightmapSubsectionOffset), 0f);
-        
-        
+        WeightmapLayerAllocations = GetOrDefault(nameof(WeightmapLayerAllocations), Array.Empty<FWeightmapLayerAllocationInfo>());
         // throw new NotImplementedException();
     }
 
-    public void GetComponentExtent(ref int MinX, ref int MinY, ref int MaxX, ref int MaxY)
+    public void GetComponentExtent(ref int minX, ref int minY, ref int maxX, ref int maxY)
     {
-        MinX = Math.Min(SectionBaseX, MinX);
-        MinY = Math.Min(SectionBaseY, MinY);
-        MaxX = Math.Max(SectionBaseX + ComponentSizeQuads, MaxX);
-        MaxY = Math.Max(SectionBaseY + ComponentSizeQuads, MaxY);
+        minX = Math.Min(SectionBaseX, minX);
+        minY = Math.Min(SectionBaseY, minY);
+        maxX = Math.Max(SectionBaseX + ComponentSizeQuads, maxX);
+        maxY = Math.Max(SectionBaseY + ComponentSizeQuads, maxY);
     }
 
     public FIntRect GetComponentExtent()
     {
-        int MinX = int.MaxValue, MinY = int.MaxValue;
-        int MaxX = int.MinValue, MaxY = int.MinValue;
-        GetComponentExtent(ref MinX, ref MinY, ref MaxX, ref MaxY);
-        return new FIntRect(new FIntPoint(MinX, MinY), new FIntPoint(MaxX, MaxY));
+        int minX = int.MaxValue, minY = int.MaxValue;
+        int maxX = int.MinValue, maxY = int.MinValue;
+        GetComponentExtent(ref minX, ref minY, ref maxX, ref maxY);
+        return new FIntRect(new FIntPoint(minX, minY), new FIntPoint(maxX, maxY));
     }
-    
+
     public UTexture2D? GetHeightmap(bool bWorkOnEditingLayer) => GetOrDefault<UTexture2D>("HeightmapTexture", null);
+    public UTexture2D[] GetWeightmapTextures(bool bWorkOnEditingLayer) =>
+        GetOrDefault<UTexture2D[]>("WeightmapTextures", Array.Empty<UTexture2D>());
+
+    public FWeightmapLayerAllocationInfo[] GetWeightmapLayerAllocations(bool bWorkOnEditingLayer) => WeightmapLayerAllocations;
 }

@@ -19,7 +19,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Component
             base.Deserialize(Ar, validPos);
 
             RelativeLocation = GetOrDefault<FVector>(nameof(RelativeLocation), new FVector());
-            RelativeRotation = GetOrDefault<FRotator>(nameof(RelativeRotation), new FRotator(EForceInit.ForceInit));
+            RelativeRotation = GetOrDefault<FRotator>(nameof(RelativeRotation), FRotator.ZeroRotator);
             RelativeScale3D = GetOrDefault<FVector>(nameof(RelativeScale3D), FVector.OneVector);
 
             AttachParent = GetOrDefault<FPackageIndex>(nameof(AttachParent), new FPackageIndex());

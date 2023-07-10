@@ -5,6 +5,17 @@ using CUE4Parse.UE4.Objects.Meshes;
 
 namespace CUE4Parse_Conversion.Meshes.PSK
 {
+    public readonly struct CVertexColor {
+        public readonly string Name;
+        public readonly FColor[] Colors;
+
+        public CVertexColor(string name, FColor[] colors)
+        {
+            Name = name;
+            Colors = colors;
+        }
+    }
+    
     public class CBaseMeshLod
     {
         public int NumVerts = 0;
@@ -15,8 +26,9 @@ namespace CUE4Parse_Conversion.Meshes.PSK
         public Lazy<CMeshSection[]> Sections;
         public Lazy<FMeshUVFloat[][]> ExtraUV;
         public FColor[]? VertexColors;
-        public Lazy<FRawStaticIndexBuffer> Indices;
-        public bool SkipLod => Sections.Value.Length < 1 || Indices.Value == null;
+        public CVertexColor[]? ExtraVertexColors;
+        public Lazy<FRawStaticIndexBuffer>? Indices;
+        public bool SkipLod => Sections.Value.Length < 1 || Indices?.Value == null;
 
         public void AllocateUVBuffers()
         {
@@ -49,6 +61,8 @@ namespace CUE4Parse_Conversion.Meshes.PSK
             {
                 VertexColors[i] = new FColor();
             }
+
+            ExtraVertexColors = Array.Empty<CVertexColor>();
         }
     }
 }

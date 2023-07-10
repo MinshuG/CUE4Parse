@@ -124,7 +124,17 @@ namespace CUE4Parse.UE4.Assets.Readers
                 return rawAr == null ? null : new FAssetArchive(rawAr, Owner, absoluteOffset);
             });
         }
-
+        
+        private Dictionary<PayloadType, Lazy<FAssetArchive?>> ClonePayloads()
+        {
+            var payloads = new Dictionary<PayloadType, Lazy<FAssetArchive?>>();
+            foreach (var (type, payload) in _payloads)
+            {
+                payloads[type] = new Lazy<FAssetArchive?>(() => (FAssetArchive)payload.Value?.Clone()!);
+            }
+            return payloads;
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int Read(byte[] buffer, int offset, int count)
             => _baseArchive.Read(buffer, offset, count);
@@ -172,6 +182,6 @@ namespace CUE4Parse.UE4.Assets.Readers
 
         // For performance reasons we carry over the payloads dict to the cloned instance
         // Shouldn't be a big deal since we add the payloads during package initialization phase, not during object serialization
-        public override object Clone() => new FAssetArchive((FArchive) _baseArchive.Clone(), Owner, AbsoluteOffset, _payloads);
+        public override object Clone() => new FAssetArchive((FArchive) _baseArchive.Clone(), Owner, AbsoluteOffset, ClonePayloads());
     }
 }

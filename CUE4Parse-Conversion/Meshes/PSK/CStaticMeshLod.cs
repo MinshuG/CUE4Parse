@@ -6,7 +6,7 @@ namespace CUE4Parse_Conversion.Meshes.PSK
 {
     public class CStaticMeshLod : CBaseMeshLod
     {
-        public CMeshVertex[] Verts;
+        public CMeshVertex[] Verts = null!;
 
         public void AllocateVerts(int count)
         {

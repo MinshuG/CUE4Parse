@@ -45,7 +45,7 @@ public class PSKExporter: ExporterBase
         infHdr.DataSize = 12;
         Ar.SerializeChunkHeader(infHdr, "RAWWEIGHTS");
 
-        ExportVertexColors(Ar, lod.VertexColors, lod.NumVerts);
+        ExportVertexColors(Ar, lod.VertexColors, lod.ExtraVertexColors, lod.NumVerts);
         ExportExtraUV(Ar, lod.ExtraUV.Value, lod.NumVerts, lod.NumTexCoords);
     }
 
@@ -99,7 +99,7 @@ public class PSKExporter: ExporterBase
             }
         }
 
-        ExportVertexColors(Ar, lod.VertexColors, lod.NumVerts);
+        ExportVertexColors(Ar, lod.VertexColors, lod.ExtraVertexColors, lod.NumVerts);
         ExportExtraUV(Ar, lod.ExtraUV.Value, lod.NumVerts, lod.NumTexCoords);
         ExportMorphTargets(Ar, lod, share, morphTargets, lodIndex);
     }
@@ -150,7 +150,7 @@ public class PSKExporter: ExporterBase
             Ar.Write(share.WedgeToVert[i]);
             Ar.Write(verts[i].UV.U);
             Ar.Write(verts[i].UV.V);
-            Ar.Write((byte) wedgeMat[i]);
+            Ar.Write((byte)wedgeMat[i]);
             Ar.Write((byte) 0);
             Ar.Write((short) 0);
         }
@@ -271,16 +271,29 @@ public class PSKExporter: ExporterBase
         }
     }
 
-    public void ExportVertexColors(FArchiveWriter Ar, FColor[]? colors, int numVerts)
+    public void ExportVertexColors(FArchiveWriter Ar, FColor[]? colors, CVertexColor[]? extraColors, int numVerts)
     {
-        if (colors == null) return;
+        if (colors != null) {
+            var colorHdr = new VChunkHeader { DataCount = numVerts, DataSize = 4 };
+            Ar.SerializeChunkHeader(colorHdr, "VERTEXCOLOR");
 
-        var colorHdr = new VChunkHeader { DataCount = numVerts, DataSize = 4 };
-        Ar.SerializeChunkHeader(colorHdr, "VERTEXCOLOR");
+            for (var i = 0; i < numVerts; i++)
+            {
+                colors[i].Serialize(Ar);
+            }
+        }
 
-        for (var i = 0; i < numVerts; i++)
-        {
-            colors[i].Serialize(Ar);
+        if (extraColors == null) return;
+        
+        for (int i = 0; i < extraColors.Length; i++) {
+            var name = extraColors[i].Name;
+            var extraColorHdr = new VChunkHeader { DataCount = numVerts, DataSize = 4 };
+            Ar.SerializeChunkHeader(extraColorHdr, $"EVTXC_{name}");
+
+            for (var j = 0; j < numVerts; j++)
+            {
+                extraColors[i].Colors[j].Serialize(Ar);
+            }
         }
     }
 
