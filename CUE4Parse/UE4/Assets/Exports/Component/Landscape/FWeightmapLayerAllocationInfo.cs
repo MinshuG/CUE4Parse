@@ -12,10 +12,19 @@ public class FWeightmapLayerAllocationInfo: IEquatable<FWeightmapLayerAllocation
     public byte WeightmapTextureIndex;
     public byte WeightmapTextureChannel;
 
+    private string? _layerName;
+
     public FWeightmapLayerAllocationInfo(FStructFallback fallback) {
         LayerInfo = fallback.GetOrDefault(nameof(LayerInfo), new FPackageIndex());
+        _layerName = LayerInfo.Name;
         WeightmapTextureIndex = fallback.GetOrDefault<byte>(nameof(WeightmapTextureIndex));
         WeightmapTextureChannel = fallback.GetOrDefault<byte>(nameof(WeightmapTextureChannel));
+    }
+
+    public string GetLayerName() {
+        if (_layerName != null) return _layerName;
+        if (LayerInfo.IsNull) return "None";
+        return _layerName = LayerInfo.Name;
     }
 
     public bool Equals(FWeightmapLayerAllocationInfo? other) {

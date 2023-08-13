@@ -38,10 +38,10 @@ namespace CUE4Parse.UE4.IO.Objects
         private const int Signature = 0x496f436e;
         public FIoContainerId ContainerId;
 
-        public FPackageId[] PackageIds;
+        public ulong[] PackageIds;
         public FFilePackageStoreEntry[] StoreEntries;
         public FFilePackageStoreEntry[] OptionalSegmentStoreEntries;
-        public FPackageId[] OptionalSegmentPackageIds;
+        public ulong[] OptionalSegmentPackageIds;
 
         public FNameEntrySerialized[]? ContainerNameMap; // RedirectsNameMap
         // public FIoContainerHeaderLocalizedPackage[]? LocalizedPackages;
@@ -91,9 +91,9 @@ namespace CUE4Parse.UE4.IO.Objects
             // PackageRedirects = Ar.ReadArray<FIoContainerHeaderPackageRedirect>();
         }
 
-        private void ReadPackageIdsAndEntries(FArchive Ar, out FPackageId[] packageIds, out FFilePackageStoreEntry[] storeEntries, EIoContainerHeaderVersion version)
+        private void ReadPackageIdsAndEntries(FArchive Ar, out ulong[] packageIds, out FFilePackageStoreEntry[] storeEntries, EIoContainerHeaderVersion version)
         {
-            packageIds = Ar.ReadArray<FPackageId>();
+            packageIds = Ar.ReadArray<ulong>();
             var storeEntriesSize = Ar.Read<int>();
             var storeEntriesEnd = Ar.Position + storeEntriesSize;
             storeEntries = Ar.ReadArray(packageIds.Length, () => new FFilePackageStoreEntry(Ar, version));

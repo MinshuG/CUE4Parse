@@ -51,10 +51,16 @@ namespace CUE4Parse.UE4.Readers
             Unsafe.CopyBlockUnaligned(ref ptr[0], ref bytes[0], (uint) length);
         }
 
+        public virtual void Serialize<T>(out T[] ptr, int length)
+        {
+            ptr = ReadArray<T>(length);
+        }
+
         public virtual T Read<T>()
         {
             var size = Unsafe.SizeOf<T>();
             var buffer = ReadBytes(size);
+            Debug.Assert(size == buffer.Length, $"sizeof({typeof(T).Name}) != {buffer.Length} (buffer.Length)");
             return Unsafe.ReadUnaligned<T>(ref buffer[0]);
         }
 
@@ -282,8 +288,8 @@ namespace CUE4Parse.UE4.Readers
             if (length == int.MinValue)
                 throw new ArgumentOutOfRangeException(nameof(length), "Archive is corrupted");
 
-            // if (length is < -512000 or > 512000)
-            //     throw new ParserException($"Invalid FString length '{length}'");
+            if (length is < -512000 or > 512000)
+                throw new ParserException($"Invalid FString length '{length}'");
 
             if (length == 0)
             {
@@ -311,7 +317,9 @@ namespace CUE4Parse.UE4.Readers
                     }
                 }
             }
-
+            // var ansiBqytes = length <= 1024 ? stackalloc byte[length] : new byte[length];
+            Serialize<byte>(out var ansibytes, length);
+            return Encoding.Default.GetString(ansibytes, 0, length - 1);
             unsafe
             {
                 var ansiBytes = length <= 1024 ? stackalloc byte[length] : new byte[length];

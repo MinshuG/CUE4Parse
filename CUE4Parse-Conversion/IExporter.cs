@@ -78,6 +78,11 @@ namespace CUE4Parse_Conversion
         public abstract bool TryWriteToZip(out byte[] zipFile);
         public abstract void AppendToZip();
 
+        protected string GetExportSavePath() {
+            var path = PackagePath.SubstringAfterLast('/') == ExportName ? PackagePath : PackagePath + '/' + ExportName;
+            return path;
+        }
+
         protected string FixAndCreatePath(DirectoryInfo baseDirectory, string fullPath, string? ext = null)
         {
             if (fullPath.StartsWith("/")) fullPath = fullPath[1..];

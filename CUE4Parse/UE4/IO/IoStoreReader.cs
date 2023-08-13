@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -207,15 +208,15 @@ namespace CUE4Parse.UE4.IO
         {
             var compressionBlockSize = TocResource.Header.CompressionBlockSize;
             var dst = new byte[length];
-            var firstBlockIndex = (int) (offset / compressionBlockSize);
-            var lastBlockIndex = (int) (((offset + dst.Length).Align((int) compressionBlockSize) - 1) / compressionBlockSize);
+            var firstBlockIndex = (int)(offset / compressionBlockSize);
+            var lastBlockIndex = (int)(((offset + dst.Length).Align((int)compressionBlockSize) - 1) / compressionBlockSize);
             var offsetInBlock = offset % compressionBlockSize;
             var remainingSize = length;
             var dstOffset = 0;
 
-            var compressedBuffer = Array.Empty<byte>();
-            var uncompressedBuffer = Array.Empty<byte>();
-
+            var compressedBuffer = ArrayPool<byte>.Shared.Rent((int)compressionBlockSize);
+            var uncompressedBuffer = ArrayPool<byte>.Shared.Rent((int)compressionBlockSize);
+            // var clonedReaders = new Dictionary<int, FArchive>();
             var clonedReaders = new FArchive?[ContainerStreams.Count];
 
             for (int blockIndex = firstBlockIndex; blockIndex <= lastBlockIndex; blockIndex++)
@@ -225,19 +226,21 @@ namespace CUE4Parse.UE4.IO
                 var rawSize = compressionBlock.CompressedSize.Align(Aes.ALIGN);
                 if (compressedBuffer.Length < rawSize)
                 {
-                    //Console.WriteLine($"{chunkId}: block {blockIndex} CompressedBuffer size: {rawSize} - Had to create copy");
-                    compressedBuffer = new byte[rawSize];
+                    // Resize the buffer if necessary
+                    ArrayPool<byte>.Shared.Return(compressedBuffer);
+                    compressedBuffer = ArrayPool<byte>.Shared.Rent((int)rawSize);
                 }
 
                 var uncompressedSize = compressionBlock.UncompressedSize;
                 if (uncompressedBuffer.Length < uncompressedSize)
                 {
-                    //Console.WriteLine($"{chunkId}: block {blockIndex} UncompressedBuffer size: {uncompressedSize} - Had to create copy");
-                    uncompressedBuffer = new byte[uncompressedSize];
+                    // Resize the buffer if necessary
+                    ArrayPool<byte>.Shared.Return(uncompressedBuffer);
+                    uncompressedBuffer = ArrayPool<byte>.Shared.Rent((int)uncompressedSize);
                 }
 
-                var partitionIndex = (int) ((ulong) compressionBlock.Offset / TocResource.Header.PartitionSize);
-                var partitionOffset = (long) ((ulong) compressionBlock.Offset % TocResource.Header.PartitionSize);
+                var partitionIndex = (int)((ulong)compressionBlock.Offset / TocResource.Header.PartitionSize);
+                var partitionOffset = (long)((ulong)compressionBlock.Offset % TocResource.Header.PartitionSize);
                 FArchive reader;
                 if (IsConcurrent)
                 {
@@ -248,8 +251,8 @@ namespace CUE4Parse.UE4.IO
                 else reader = ContainerStreams[partitionIndex];
 
                 reader.Position = partitionOffset;
-                reader.Read(compressedBuffer, 0, (int) rawSize);
-                compressedBuffer = DecryptIfEncrypted(compressedBuffer, 0, (int) rawSize);
+                reader.Read(compressedBuffer, 0, (int)rawSize);
+                compressedBuffer = DecryptIfEncrypted(compressedBuffer, 0, (int)rawSize);
 
                 byte[] src;
                 if (compressionBlock.CompressionMethodIndex == 0)
@@ -259,13 +262,13 @@ namespace CUE4Parse.UE4.IO
                 else
                 {
                     var compressionMethod = TocResource.CompressionMethods[compressionBlock.CompressionMethodIndex];
-                    Compression.Compression.Decompress(compressedBuffer, 0, (int) rawSize, uncompressedBuffer, 0,
-                        (int) uncompressedSize, compressionMethod, reader);
+                    Compression.Compression.Decompress(compressedBuffer, 0, (int)rawSize, uncompressedBuffer, 0,
+                        (int)uncompressedSize, compressionMethod, reader);
                     src = uncompressedBuffer;
                 }
 
-                var sizeInBlock = (int) Math.Min(compressionBlockSize - offsetInBlock, remainingSize);
-                Buffer.BlockCopy(src, (int) offsetInBlock, dst, dstOffset, sizeInBlock);
+                var sizeInBlock = (int)Math.Min(compressionBlockSize - offsetInBlock, remainingSize);
+                Buffer.BlockCopy(src, (int)offsetInBlock, dst, dstOffset, sizeInBlock);
                 offsetInBlock = 0;
                 remainingSize -= sizeInBlock;
                 dstOffset += sizeInBlock;
@@ -273,8 +276,17 @@ namespace CUE4Parse.UE4.IO
                 reader.Position = 0;
             }
 
+            // Return the rented arrays to the pool before exiting the method
+            ArrayPool<byte>.Shared.Return(compressedBuffer);
+            ArrayPool<byte>.Shared.Return(uncompressedBuffer);
+
+            foreach (var clonedReader in clonedReaders) { // this matters?
+                clonedReader?.Dispose();
+            }
+            
             return dst;
         }
+
 
         public override IReadOnlyDictionary<string, GameFile> Mount(bool caseInsensitive = false)
         {

@@ -87,16 +87,15 @@ namespace CUE4Parse_Conversion.Meshes
                     default:
                         throw new ArgumentOutOfRangeException(nameof(Options.MeshFormat), Options.MeshFormat, null);
                 }
-                
+
+                var path = GetExportSavePath();
                 if (Options.LodFormat == ELodFormat.FirstLod)
                 {
-                    MeshLods.Add(new Mesh($"{PackagePath}.{ext}", Ar.GetBuffer(), materialExports ?? new List<MaterialExporter2>()));
+                    MeshLods.Add(new Mesh($"{path}.{ext}", Ar.GetBuffer(), materialExports ?? new List<MaterialExporter2>()));
                     break;
                 }
-                else
-                {
-                    MeshLods.Add(new Mesh($"{PackagePath}_LOD{i}.{ext}", Ar.GetBuffer(), materialExports ?? new List<MaterialExporter2>()));
-                }
+
+                MeshLods.Add(new Mesh($"{path}_LOD{i}.{ext}", Ar.GetBuffer(), materialExports ?? new List<MaterialExporter2>()));
             }
         }
 
@@ -158,13 +157,14 @@ namespace CUE4Parse_Conversion.Meshes
                         throw new ArgumentOutOfRangeException(nameof(Options.MeshFormat), Options.MeshFormat, null);
                 }
 
+                var path = PackagePath.SubstringAfterLast('/') == ExportName ? PackagePath : PackagePath + '/' + ExportName;
                 if (Options.LodFormat == ELodFormat.FirstLod)
                 {
-                    MeshLods.Add(new Mesh($"{PackagePath}.{ext}", Ar.GetBuffer(), materialExports ?? new List<MaterialExporter2>()));
+                    MeshLods.Add(new Mesh($"{path}.{ext}", Ar.GetBuffer(), materialExports ?? new List<MaterialExporter2>()));
                     break;
                 }
 
-                MeshLods.Add(new Mesh($"{PackagePath}_LOD{i}.{ext}", Ar.GetBuffer(), materialExports ?? new List<MaterialExporter2>()));
+                MeshLods.Add(new Mesh($"{path}_LOD{i}.{ext}", Ar.GetBuffer(), materialExports ?? new List<MaterialExporter2>()));
                 i++;
             }
         }
@@ -177,7 +177,7 @@ namespace CUE4Parse_Conversion.Meshes
         {
             var b = false;
             label = string.Empty;
-            savedFilePath = PackagePath;
+            savedFilePath = string.Empty;
             if (MeshLods.Count == 0) return b;
 
             var outText = "LOD ";

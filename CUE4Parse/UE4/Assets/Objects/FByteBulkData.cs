@@ -13,25 +13,107 @@ namespace CUE4Parse.UE4.Assets.Objects
     {
         public readonly FByteBulkDataHeader Header;
         public readonly EBulkDataFlags BulkDataFlags;
-        public readonly byte[]? Data;
+
+        public byte[]? Data {
+            get {
+                InitData();
+                return _data;
+            }
+            private set {
+                _data = value;
+                _isInitialized = true;
+            }
+        }
+
+        private byte[]? _data;
+        private readonly FAssetArchive _savedAr;
+        private readonly long _dataPosition;
+        private bool _isInitialized;
 
         public FByteBulkData(FAssetArchive Ar)
         {
             Header = new FByteBulkDataHeader(Ar);
             BulkDataFlags = Header.BulkDataFlags;
-
+            
             if (Header.ElementCount == 0)
             {
+                _isInitialized = true;
                 // Nothing to do here
             }
             else if (BulkDataFlags.HasFlag(BULKDATA_Unused))
             {
+                _isInitialized = true;
                 Log.Warning("Bulk with no data");
             }
-            else if (BulkDataFlags.HasFlag(BULKDATA_ForceInlinePayload))
+
+            _dataPosition = Ar.Position;
+            this._savedAr = Ar;
+
+            if (BulkDataFlags.HasFlag(BULKDATA_ForceInlinePayload))
+            {
+// #if DEBUG
+//                 Log.Debug($"bulk data in .uexp file (Force Inline Payload) (flags={BulkDataFlags}, pos={Header.OffsetInFile}, size={Header.SizeOnDisk}))");
+// #endif
+                // Data = new byte[Header.ElementCount];
+                // Ar.Read(Data, 0, Header.ElementCount);
+                Ar.Position += Header.ElementCount;
+            }
+            else if (BulkDataFlags.HasFlag(BULKDATA_OptionalPayload))
+            {
+// #if DEBUG
+//                 Log.Debug($"bulk data in .uptnl file (Optional Payload) (flags={BulkDataFlags}, pos={Header.OffsetInFile}, size={Header.SizeOnDisk}))");
+// #endif
+//                 if (!Ar.TryGetPayload(PayloadType.UPTNL, out var uptnlAr) || uptnlAr == null) return;
+//
+//                 Data = new byte[Header.ElementCount];
+//                 uptnlAr.Position = Header.OffsetInFile;
+//                 uptnlAr.Read(Data, 0, Header.ElementCount);
+            }
+            else if (BulkDataFlags.HasFlag(BULKDATA_PayloadInSeperateFile))
+            {
+// #if DEBUG
+//                 Log.Debug($"bulk data in .ubulk file (Payload In Separate File) (flags={BulkDataFlags}, pos={Header.OffsetInFile}, size={Header.SizeOnDisk}))");
+// #endif
+//                 if (!Ar.TryGetPayload(PayloadType.UBULK, out var ubulkAr) || ubulkAr == null) return;
+//
+//                 Data = new byte[Header.ElementCount];
+//                 ubulkAr.Position = Header.OffsetInFile;
+//                 ubulkAr.Read(Data, 0, Header.ElementCount);
+            }
+            else if (BulkDataFlags.HasFlag(BULKDATA_PayloadAtEndOfFile))
+            {
+// #if DEBUG
+//                 Log.Debug($"bulk data in .uexp file (Payload At End Of File) (flags={BulkDataFlags}, pos={Header.OffsetInFile}, size={Header.SizeOnDisk}))");
+// #endif
+//                 //stored in same file, but at different position
+//                 //save archive position
+//                 var savePos = Ar.Position;
+//                 if (Header.OffsetInFile + Header.ElementCount <= Ar.Length)
+//                 {
+//                     Data = new byte[Header.ElementCount];
+//                     Ar.Position = Header.OffsetInFile;
+//                     Ar.Read(Data, 0, Header.ElementCount);
+//                 }
+//                 else throw new ParserException(Ar, $"Failed to read PayloadAtEndOfFile, {Header.OffsetInFile} is out of range");
+//
+//                 Ar.Position = savePos;
+            }
+            else if (BulkDataFlags.HasFlag(BULKDATA_SerializeCompressedZLIB))
+            {
+                _isInitialized = true;
+                throw new ParserException(Ar, "TODO: CompressedZlib");
+            }
+        }
+
+        private void InitData() {
+            if (_isInitialized) return;
+
+            var Ar = (FAssetArchive)_savedAr.Clone();
+            Ar.Position = _dataPosition;
+            if (BulkDataFlags.HasFlag(BULKDATA_ForceInlinePayload))
             {
 #if DEBUG
-                Log.Debug($"bulk data in .uexp file (Force Inline Payload) (flags={BulkDataFlags}, pos={Header.OffsetInFile}, size={Header.SizeOnDisk}))");
+                Log.Debug("bulk data in .uexp file (Force Inline Payload) (flags={BulkDataFlags}, pos={HeaderOffsetInFile}, size={HeaderSizeOnDisk}))", BulkDataFlags, Header.OffsetInFile, Header.SizeOnDisk);
 #endif
                 Data = new byte[Header.ElementCount];
                 Ar.Read(Data, 0, Header.ElementCount);
@@ -39,7 +121,7 @@ namespace CUE4Parse.UE4.Assets.Objects
             else if (BulkDataFlags.HasFlag(BULKDATA_OptionalPayload))
             {
 #if DEBUG
-                Log.Debug($"bulk data in .uptnl file (Optional Payload) (flags={BulkDataFlags}, pos={Header.OffsetInFile}, size={Header.SizeOnDisk}))");
+                Log.Debug("bulk data in .uptnl file (Optional Payload) (flags={BulkDataFlags}, pos={HeaderOffsetInFile}, size={HeaderSizeOnDisk}))", BulkDataFlags, Header.OffsetInFile, Header.SizeOnDisk);
 #endif
                 if (!Ar.TryGetPayload(PayloadType.UPTNL, out var uptnlAr) || uptnlAr == null) return;
 
@@ -50,7 +132,7 @@ namespace CUE4Parse.UE4.Assets.Objects
             else if (BulkDataFlags.HasFlag(BULKDATA_PayloadInSeperateFile))
             {
 #if DEBUG
-                Log.Debug($"bulk data in .ubulk file (Payload In Separate File) (flags={BulkDataFlags}, pos={Header.OffsetInFile}, size={Header.SizeOnDisk}))");
+                Log.Debug("bulk data in .ubulk file (Payload In Separate File) (flags={BulkDataFlags}, pos={HeaderOffsetInFile}, size={HeaderSizeOnDisk}))", BulkDataFlags, Header.OffsetInFile, Header.SizeOnDisk);
 #endif
                 if (!Ar.TryGetPayload(PayloadType.UBULK, out var ubulkAr) || ubulkAr == null) return;
 
@@ -61,7 +143,7 @@ namespace CUE4Parse.UE4.Assets.Objects
             else if (BulkDataFlags.HasFlag(BULKDATA_PayloadAtEndOfFile))
             {
 #if DEBUG
-                Log.Debug($"bulk data in .uexp file (Payload At End Of File) (flags={BulkDataFlags}, pos={Header.OffsetInFile}, size={Header.SizeOnDisk}))");
+                Log.Debug("bulk data in .uexp file (Payload At End Of File) (flags={BulkDataFlags}, pos={HeaderOffsetInFile}, size={HeaderSizeOnDisk}))", BulkDataFlags, Header.OffsetInFile, Header.SizeOnDisk);
 #endif
                 //stored in same file, but at different position
                 //save archive position
@@ -80,6 +162,7 @@ namespace CUE4Parse.UE4.Assets.Objects
             {
                 throw new ParserException(Ar, "TODO: CompressedZlib");
             }
+            Ar.Dispose();
         }
 
         protected FByteBulkData(FAssetArchive Ar, bool skip = false)

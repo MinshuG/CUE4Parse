@@ -99,16 +99,7 @@ public class FTexturePlatformData
 
             if (Owner is UVolumeTexture or UTextureCube)
                 Mips[i].SizeY *= GetNumSlices();
-
-            // Count++;
-            // if (Mips[i].BulkData.Data != null)
-            //     break; // first mip only thanks. no need to waste memory
-            
         }
-        // trim mips
-
-        var x = Mips.ToList().IndexOf(Mips.First(x => x.BulkData.Data != null));
-        Array.Resize(ref Mips, x+1);
 
         if (Ar.Versions["VirtualTextures"] && Ar.Platform != ETexturePlatform.Playstation) // TODO: Until we figure out how to calculate mipCount properly, VT has to be ignored.
         {

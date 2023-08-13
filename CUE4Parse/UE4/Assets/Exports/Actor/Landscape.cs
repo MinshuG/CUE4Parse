@@ -24,8 +24,8 @@ public class ALandscapeProxy : AActor
         NumSubsections = GetOrDefault<int>(nameof(NumSubsections));
         LandscapeComponents = GetOrDefault<FPackageIndex[]>(nameof(LandscapeComponents), Array.Empty<FPackageIndex>());
         LandscapeSectionOffset = GetOrDefault<int>(nameof(LandscapeSectionOffset));
-        LandscapeMaterial = GetOrDefault<FPackageIndex>(nameof(LandscapeMaterial));
-        SplineComponent = GetOrDefault<FPackageIndex>(nameof(SplineComponent));
+        LandscapeMaterial = GetOrDefault<FPackageIndex>(nameof(LandscapeMaterial), new FPackageIndex());
+        SplineComponent = GetOrDefault<FPackageIndex>(nameof(SplineComponent), new FPackageIndex());
     }
 }
 

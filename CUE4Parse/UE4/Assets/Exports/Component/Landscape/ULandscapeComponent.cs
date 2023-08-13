@@ -19,6 +19,8 @@ public class ULandscapeComponent: UPrimitiveComponent
     public FVector4 WeightmapScaleBias;
     public float WeightmapSubsectionOffset;
     public FWeightmapLayerAllocationInfo[] WeightmapLayerAllocations;
+    
+    public Lazy<UTexture2D[]> WeightmapTextures;
 
     public override void Deserialize(FAssetArchive Ar, long validPos)
     {
@@ -33,6 +35,8 @@ public class ULandscapeComponent: UPrimitiveComponent
         WeightmapSubsectionOffset = GetOrDefault(nameof(WeightmapSubsectionOffset), 0f);
         WeightmapLayerAllocations = GetOrDefault(nameof(WeightmapLayerAllocations), Array.Empty<FWeightmapLayerAllocationInfo>());
         // throw new NotImplementedException();
+        WeightmapTextures =
+            new Lazy<UTexture2D[]>(() => GetOrDefault<UTexture2D[]>("WeightmapTextures", Array.Empty<UTexture2D>()));
     }
 
     public void GetComponentExtent(ref int minX, ref int minY, ref int maxX, ref int maxY)
@@ -52,8 +56,7 @@ public class ULandscapeComponent: UPrimitiveComponent
     }
 
     public UTexture2D? GetHeightmap(bool bWorkOnEditingLayer) => GetOrDefault<UTexture2D>("HeightmapTexture", null);
-    public UTexture2D[] GetWeightmapTextures(bool bWorkOnEditingLayer) =>
-        GetOrDefault<UTexture2D[]>("WeightmapTextures", Array.Empty<UTexture2D>());
+    public UTexture2D[] GetWeightmapTextures(bool bWorkOnEditingLayer) => WeightmapTextures.Value;
 
     public FWeightmapLayerAllocationInfo[] GetWeightmapLayerAllocations(bool bWorkOnEditingLayer) => WeightmapLayerAllocations;
 }

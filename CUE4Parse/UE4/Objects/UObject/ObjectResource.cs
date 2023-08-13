@@ -38,19 +38,22 @@ namespace CUE4Parse.UE4.Objects.UObject
         public bool IsNull => Index == 0;
         public bool IsExport => Index > 0;
         public bool IsImport => Index < 0;
-
-        public string Name => ResolvedObject?.Name.Text ?? "None";
+        // ResolvedObject?.Name.Text ?? "None"
+        private Lazy<string> _name;
+        public string Name => _name.Value;
 
         public FPackageIndex(FAssetArchive Ar, int index)
         {
             Index = index;
             Owner = Ar.Owner;
+            _name = new Lazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
         }
 
         public FPackageIndex(FAssetArchive Ar)
         {
             Index = Ar.Read<int>();
             Owner = Ar.Owner;
+            _name = new Lazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
         }
 
         public FPackageIndex(FKismetArchive Ar)
@@ -58,12 +61,14 @@ namespace CUE4Parse.UE4.Objects.UObject
             Index = Ar.Read<int>();
             Owner = Ar.Owner;
             Ar.Index += 4;
+            _name = new Lazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
         }
 
         public FPackageIndex()
         {
             Index = 0;
             Owner = null;
+            _name = new Lazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
         }
 
         public override string ToString()

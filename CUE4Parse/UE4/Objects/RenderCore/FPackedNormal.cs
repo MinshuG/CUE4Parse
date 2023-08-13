@@ -14,13 +14,13 @@ namespace CUE4Parse.UE4.Objects.RenderCore
     public struct FPackedNormal
     {
         [System.Runtime.InteropServices.FieldOffset(0)]
-        private sbyte X;
+        public readonly sbyte X;
         [System.Runtime.InteropServices.FieldOffset(1)]
-        private sbyte Y;
+        public readonly sbyte Y;
         [System.Runtime.InteropServices.FieldOffset(2)]
-        private sbyte Z;
+        public readonly sbyte Z;
         [System.Runtime.InteropServices.FieldOffset(3)]
-        private sbyte W;
+        public readonly sbyte W;
 
         [System.Runtime.InteropServices.FieldOffset(0)]
         public uint Data;
