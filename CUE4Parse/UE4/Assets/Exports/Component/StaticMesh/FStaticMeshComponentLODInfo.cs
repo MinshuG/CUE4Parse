@@ -1,4 +1,5 @@
 using System;
+using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Objects.Engine;
@@ -42,7 +43,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
         public readonly FPaintedVertex[] PaintedVertices;
         public readonly FColorVertexBuffer? OverrideVertexColors;
 
-        public FStaticMeshComponentLODInfo(FArchive Ar)
+        public FStaticMeshComponentLODInfo(FAssetArchive Ar)
         {
             var stripFlags = new FStripDataFlags(Ar);
 
@@ -60,8 +61,8 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
                     OverrideVertexColors = new FColorVertexBuffer(Ar);
                 }
             }
-
-            if (!stripFlags.IsEditorDataStripped())
+            // if (!StripFlags.IsEditorDataStripped() && !(Ar.IsFilterEditorOnly() && Ar.IsCountingMemory()) && !Ar.IsObjectReferenceCollector())
+            if (!stripFlags.IsEditorDataStripped() && !(Ar.IsFilterEditorOnly))
             {
                 PaintedVertices = Ar.ReadArray(() => new FPaintedVertex(Ar));
             }
