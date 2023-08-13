@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.UObject;
 using Newtonsoft.Json;
@@ -11,15 +13,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
         public override void Deserialize(FAssetArchive Ar, long validPos)
         {
             base.Deserialize(Ar, validPos);
-            LODData = Ar.ReadArray(() => new FStaticMeshComponentLODInfo(Ar));
-            // Ar.DumpBytesToHex(80);
-
-            if (Ar.Owner.Provider?.InternalGameName.ToLower() == "fortnitegame") {
-                var read = Ar.Read<uint>();
-                if (read == 1) { // not bool it's a int TODO fix
-                    Ar.Position += 0x40-4;
-                }
-            }
+            LODData = Ar.ReadArray(() => new FStaticMeshComponentLODInfo(Ar));            
         }
 
         public FPackageIndex GetStaticMesh()

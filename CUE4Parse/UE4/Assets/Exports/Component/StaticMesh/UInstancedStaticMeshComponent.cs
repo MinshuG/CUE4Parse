@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Versions;
 using Newtonsoft.Json;
@@ -12,7 +13,22 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
         public override void Deserialize(FAssetArchive Ar, long validPos)
         {
             base.Deserialize(Ar, validPos);
-             // just skip till 01 00 00 00 80 00 00 00 (bCooked and sizeof(PerInstanceSMData->FMatrix))
+            if (Ar.Owner.Provider?.InternalGameName.ToLower() == "fortnitegame") {
+                var read = Ar.Read<uint>();
+                Ar.DumpBytesToHex(64);
+                switch (read) {
+                    case 1:
+                        Ar.Position += 60;
+                        break;
+                    case 53009:
+                        Ar.Position += 52;
+                        break;
+                    default:
+                        Debugger.Break();
+                        break;
+                }
+            }
+             // just skip till [01 00 00 00] [80 00 00 00] (bCooked and sizeof(PerInstanceSMData->FMatrix))
             // Ar.DumpBytesToHex(16*2);
             var bCooked = false;
             if (FFortniteMainBranchObjectVersion.Get(Ar) >= FFortniteMainBranchObjectVersion.Type.SerializeInstancedStaticMeshRenderData ||
@@ -20,7 +36,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
             {
                 bCooked = Ar.ReadBoolean();
             }
-            // Ar.DumpBytesToHex(16*2*10);
+
             PerInstanceSMData = Ar.ReadBulkArray(() => new FInstancedStaticMeshInstanceData(Ar));
 
             if (FRenderingObjectVersion.Get(Ar) >= FRenderingObjectVersion.Type.PerInstanceCustomData)
@@ -36,6 +52,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
                 if (renderDataSizeBytes > 0)
                 {
                     // idk what to do here... But it fixes the warnings 🤷‍
+                    // Debug.Assert(Ar.Position + renderDataSizeBytes == validPos);
                     Ar.Position = validPos;
                 }
             }
