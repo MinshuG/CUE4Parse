@@ -87,7 +87,8 @@ namespace CUE4Parse.UE4.Assets
                 FFilePackageStoreEntry? storeEntry = null;
                 if (containerHeader != null)
                 {
-                    var packageId = FPackageId.FromName(Name);
+                    // TODO 
+                    var packageId = FPackageId.FromName(Name).id;
                     var storeEntryIdx = Array.IndexOf(containerHeader.PackageIds, packageId);
                     if (storeEntryIdx != -1)
                     {
@@ -236,9 +237,9 @@ namespace CUE4Parse.UE4.Assets
 
             if (exportBundleHeaders != null) // 4.26 - 5.2
             {
+                var currentExportDataOffset = allExportDataOffset;
                 foreach (var exportBundle in exportBundleHeaders)
                 {
-                    var currentExportDataOffset = allExportDataOffset;
                     for (var i = 0u; i < exportBundle.EntryCount; i++)
                     {
                         currentExportDataOffset += ProcessEntry(exportBundleEntries[exportBundle.FirstEntryIndex + i], currentExportDataOffset, false);
