@@ -259,7 +259,7 @@ namespace CUE4Parse.UE4.Assets
             : this(uasset, globalData, containerHeader, ubulk != null ? new Lazy<FArchive?>(() => ubulk) : null, uptnl != null ? new Lazy<FArchive?>(() => uptnl) : null, provider, mappings) { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private FName CreateFNameFromMappedName(FMappedName mappedName) =>
+        public FName CreateFNameFromMappedName(FMappedName mappedName) =>
             new(mappedName, mappedName.IsGlobal ? GlobalData.GlobalNameMap : NameMap);
 
         private void LoadExportBundles(FArchive Ar, int graphDataSize, out FExportBundleHeader[] bundleHeadersArray, out FExportBundleEntry[] bundleEntriesArray)
@@ -391,7 +391,7 @@ namespace CUE4Parse.UE4.Assets
             return null;
         }
 
-        private class ResolvedExportObject : ResolvedObject
+        public class ResolvedExportObject : ResolvedObject
         {
             public FExportMapEntry ExportMapEntry;
             public Lazy<UObject> ExportObject;

@@ -206,7 +206,7 @@ namespace CUE4Parse.UE4.Assets
             Package? importPackage = null;
             if (Provider.TryLoadPackage(outerMostImport.ObjectName.Text, out var package))
                 importPackage = package as Package;
-            if (importPackage == null)
+            if (importPackage == null && package is not IoPackage)
             {
 #if DEBUG
                 Log.Error("Missing native package ({0}) for import of {1} in {2}.", outerMostImport.ObjectName, import.ObjectName, Name);
@@ -228,16 +228,25 @@ namespace CUE4Parse.UE4.Assets
                 }
             }
 
-            for (var i = 0; i < importPackage.ExportMap.Length; i++)
-            {
-                var export = importPackage.ExportMap[i];
-                if (export.ObjectName.Text != import.ObjectName.Text)
-                    continue;
-                var thisOuter = importPackage.ResolvePackageIndex(export.OuterIndex);
-                if (thisOuter?.GetPathName() == outer)
-                    return new ResolvedExportObject(i, importPackage);
+            if (importPackage != null) {
+                for (var i = 0; i < importPackage.ExportMap.Length; i++) {
+                    var export = importPackage.ExportMap[i];
+                    if (export.ObjectName.Text != import.ObjectName.Text)
+                        continue;
+                    var thisOuter = importPackage.ResolvePackageIndex(export.OuterIndex);
+                    if (thisOuter?.GetPathName() == outer)
+                        return new ResolvedExportObject(i, importPackage);
+                }
             }
 
+            if (package is IoPackage ioPackage)
+            {
+                for (int i = 0; i < ioPackage.ExportMap.Length; i++) {
+                    var export = ioPackage.ExportMap[i];
+                    if (ioPackage.CreateFNameFromMappedName(export.ObjectName).ToString() == import.ObjectName.Text)
+                        return new IoPackage.ResolvedExportObject(i, ioPackage);
+                }
+            }
 #if DEBUG
             Log.Fatal("Missing import of ({0}): {1} in {2} was not found, but the package exists.", Name, import.ObjectName, importPackage.GetFullName());
 #endif
