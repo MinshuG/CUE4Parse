@@ -150,7 +150,7 @@ public class PSKExporter: ExporterBase
             Ar.Write(share.WedgeToVert[i]);
             Ar.Write(verts[i].UV.U);
             Ar.Write(verts[i].UV.V);
-            Ar.Write((byte)wedgeMat[i]);
+            Ar.Write((byte) wedgeMat[i]);
             Ar.Write((byte) 0);
             Ar.Write((short) 0);
         }
@@ -284,7 +284,7 @@ public class PSKExporter: ExporterBase
         }
 
         if (extraColors == null) return;
-        
+
         for (int i = 0; i < extraColors.Length; i++) {
             var name = extraColors[i].Name;
             var extraColorHdr = new VChunkHeader { DataCount = numVerts, DataSize = 4 };
@@ -330,6 +330,8 @@ public class PSKExporter: ExporterBase
             for (var j = 0; j < morphModel.Vertices.Length; j++)
             {
                 var delta = morphModel.Vertices[j];
+                if (delta.SourceIdx >= lod.Verts.Length) continue;
+                
                 var vertex = lod.Verts[delta.SourceIdx];
 
                 var index = FindVertex(vertex.Position, share.Points);
