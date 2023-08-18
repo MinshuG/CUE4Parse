@@ -15,7 +15,7 @@ namespace CUE4Parse_Conversion.Meshes.PSK
             Colors = colors;
         }
     }
-    
+
     public class CBaseMeshLod
     {
         public int NumVerts = 0;
@@ -41,7 +41,7 @@ namespace CUE4Parse_Conversion.Meshes.PSK
                 {
                     ret = Array.Empty<FMeshUVFloat[]>();
                 }
-                
+
                 for (var i = 0; i < ret.Length; i++)
                 {
                     ret[i] = new FMeshUVFloat[NumVerts];

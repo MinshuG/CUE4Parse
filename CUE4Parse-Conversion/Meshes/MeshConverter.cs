@@ -305,8 +305,8 @@ namespace CUE4Parse_Conversion.Meshes
         private static void UnpackNormals(FPackedNormal[] normal, CMeshVertex v)
         {
             // tangents: convert to FVector (unpack) then cast to CVec3
-            v.Tangent = normal[0];
-            v.Normal = normal[2];
+            v.Tangent = normal[0].GetFVector();
+            v.Normal = normal[2].GetFVector();
 
             // new UE3 version - binormal is not serialized and restored in vertex shader
             if (normal[1].Data == 0 && normal[1].Data != 0)
