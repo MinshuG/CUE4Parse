@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using CUE4Parse.UE4.Assets.Exports.Material;
+using CUE4Parse.UE4.Assets.Objects;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Objects.Engine;
@@ -46,14 +47,17 @@ public abstract class UTexture : UUnrealMaterial
         var stripFlags = Ar.Read<FStripDataFlags>();
 
         // If archive is has editor only data
-        if (!stripFlags.IsEditorDataStripped())
-        {
+        if (!stripFlags.IsEditorDataStripped()) {
+            // var source_data = new FEditorBulkData(Ar);
+
             // if (FUE5MainStreamObjectVersion.Get(Ar) < FUE5MainStreamObjectVersion.Type.VirtualizedBulkDataHaveUniqueGuids)
             // {
+            //     if if (Ar.CustomVer(FUE5MainStreamObjectVersion::GUID) < FUE5MainStreamObjectVersion::TextureSourceVirtualization)
+            //     {
             //
             // }
 
-            // throw new NotImplementedException("Non-Cooked Textures are not supported");
+            throw new NotImplementedException("Non-Cooked Textures are not supported");
         }
     }
 
