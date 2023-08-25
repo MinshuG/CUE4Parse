@@ -10,7 +10,7 @@ public class ALandscapeProxy : AActor
     public int ComponentSizeQuads;
     public int SubsectionSizeQuads;
     public int NumSubsections;
-    public FPackageIndex[] LandscapeComponents;
+    public FPackageIndex[] LandscapeComponents = Array.Empty<FPackageIndex>();
     public int LandscapeSectionOffset;
     public FPackageIndex LandscapeMaterial;
     public FPackageIndex SplineComponent;

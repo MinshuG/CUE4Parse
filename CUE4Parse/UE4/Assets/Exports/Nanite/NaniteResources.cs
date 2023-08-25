@@ -80,7 +80,25 @@ namespace CUE4Parse.UE4.Assets.Exports.Nanite
         public uint PageSize;
         public uint DependenciesStart;
         public uint DependenciesNum;
+        public byte MaxHierarchyDepth;
         public uint Flags;
+
+        public FPageStreamingState(FArchive Ar)
+        {
+            BulkOffset = Ar.Read<uint>();
+            BulkSize = Ar.Read<uint>();
+            PageSize = Ar.Read<uint>();
+            DependenciesStart = Ar.Read<uint>();
+            if (Ar.Game >= EGame.GAME_UE5_4) {
+                DependenciesNum = Ar.Read<ushort>();
+                MaxHierarchyDepth = Ar.Read<byte>();
+                Flags = Ar.Read<byte>();
+            }
+            else {
+                DependenciesNum = Ar.Read<uint>();
+                Flags = Ar.Read<uint>();    
+            }
+        }
     }
 
     public readonly struct FFixupChunk
@@ -324,11 +342,11 @@ namespace CUE4Parse.UE4.Assets.Exports.Nanite
             {
                 ResourceFlags = Ar.Read<uint>();
                 StreamablePages = new FByteBulkData(Ar);
-                
+
                 Ar.SkipFixedArray(sizeof(byte));
                 // var nanite = new FByteArchive("PackedCluster", Ar.ReadArray<byte>(), Ar.Versions);
 
-                PageStreamingStates = Ar.ReadArray<FPageStreamingState>();
+                PageStreamingStates = Ar.ReadArray(() => new FPageStreamingState(Ar));
                 HierarchyNodes = Ar.ReadArray(() => new FPackedHierarchyNode(Ar));
                 HierarchyRootOffsets = Ar.ReadArray<uint>();
                 PageDependencies = Ar.ReadArray<uint>();
