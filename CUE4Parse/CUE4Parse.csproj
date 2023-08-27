@@ -49,7 +49,7 @@
     <CMakeBuildDir>$(CMakeProject)builddir</CMakeBuildDir>
   </PropertyGroup>
 
-  <Target Name="Build-Natives" BeforeTargets="BeforeBuild">
+  <Target Name="Build-Natives" BeforeTargets="BeforeBuild" AfterTargets="AfterBuild">
     <MakeDir Directories="$(CMakeBuildDir)" Condition="!Exists('$(CMakeBuildDir)')" />
     <Exec Command="cmake .." ConsoleToMSBuild="true" WorkingDirectory="$(CMakeBuildDir)" IgnoreExitCode="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />

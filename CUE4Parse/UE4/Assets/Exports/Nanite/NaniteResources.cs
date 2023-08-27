@@ -73,7 +73,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Nanite
         }
     }
 
-    public struct FPageStreamingState
+    public class FPageStreamingState
     {
         public uint BulkOffset;
         public uint BulkSize;
@@ -83,20 +83,22 @@ namespace CUE4Parse.UE4.Assets.Exports.Nanite
         public byte MaxHierarchyDepth;
         public uint Flags;
 
-        public FPageStreamingState(FArchive Ar)
+        public FPageStreamingState(FAssetArchive Ar)
         {
             BulkOffset = Ar.Read<uint>();
             BulkSize = Ar.Read<uint>();
             PageSize = Ar.Read<uint>();
             DependenciesStart = Ar.Read<uint>();
-            if (Ar.Game >= EGame.GAME_UE5_4) {
+            if (Ar.Game >= EGame.GAME_UE5_3)
+            {
                 DependenciesNum = Ar.Read<ushort>();
                 MaxHierarchyDepth = Ar.Read<byte>();
                 Flags = Ar.Read<byte>();
             }
-            else {
+            else
+            {
                 DependenciesNum = Ar.Read<uint>();
-                Flags = Ar.Read<uint>();    
+                Flags = Ar.Read<uint>();
             }
         }
     }
@@ -328,6 +330,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Nanite
         public int NumRootPages = 0;
         public int PositionPrecision = 0;
         public int NormalPrecision = 0;
+        public int TangentPrecision = 0;
         public uint NumInputTriangles = 0;
         public uint NumInputVertices = 0;
         public ushort NumInputMeshes = 0;
