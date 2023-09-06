@@ -18,7 +18,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
 
         public FPackageIndex GetStaticMesh()
         {
-            var mesh = new FPackageIndex();
+            FPackageIndex mesh;
             var current = this;
             while (true)
             {
