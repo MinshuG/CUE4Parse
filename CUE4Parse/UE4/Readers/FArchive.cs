@@ -60,7 +60,6 @@ namespace CUE4Parse.UE4.Readers
         {
             var size = Unsafe.SizeOf<T>();
             var buffer = ReadBytes(size);
-            Debug.Assert(size == buffer.Length, $"sizeof({typeof(T).Name}) != {buffer.Length} (buffer.Length)");
             return Unsafe.ReadUnaligned<T>(ref buffer[0]);
         }
 

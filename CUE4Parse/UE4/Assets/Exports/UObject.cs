@@ -85,7 +85,7 @@ namespace CUE4Parse.UE4.Assets.Exports
                 ObjectGuid = Ar.Read<FGuid>();
             }
 
-            if (Ar.Game >= EGame.GAME_UE5_0 && Flags.HasFlag(EObjectFlags.RF_ClassDefaultObject))
+            if (Ar.Game >= EGame.GAME_UE5_0 && Flags.HasFlag(EObjectFlags.RF_ClassDefaultObject) || Flags.HasFlag(EObjectFlags.RF_ArchetypeObject))
             {
                 Ar.Position += 4; // No idea honestly
             }
@@ -431,6 +431,27 @@ namespace CUE4Parse.UE4.Assets.Exports
                     if (value is T cast)
                         return cast;
                 }
+            }
+            
+            return defaultValue;
+        }
+        
+        public static T GetOrDefault<T>(UObject holder, string name, T defaultValue = default, StringComparison comparisonType = StringComparison.Ordinal)
+        {
+            foreach (var prop in holder.Properties)
+            {
+                if (prop.Name.Text.Equals(name, comparisonType))
+                {
+                    var value = prop.Tag?.GetValue(typeof(T));
+                    if (value is T cast)
+                        return cast;
+                }
+            }
+
+            // if not here in look in template
+            var temp = holder?.Template?.Object?.Value;
+            if (temp != null) {
+                return temp.GetOrDefault<T>(name, defaultValue, comparisonType);
             }
 
             return defaultValue;

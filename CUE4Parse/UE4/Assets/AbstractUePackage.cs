@@ -66,6 +66,7 @@ namespace CUE4Parse.UE4.Assets
             try
             {
 #endif
+                Log.Verbose("Reading {0}", obj.GetFullName());
                 obj.Deserialize(Ar, validPos);
 #if DEBUG
                 var remaining = validPos - Ar.Position;

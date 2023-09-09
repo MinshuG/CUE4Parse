@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.UObject;
+using CUE4Parse.UE4.Versions;
 using Newtonsoft.Json;
 
 namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
@@ -13,6 +14,9 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
         public override void Deserialize(FAssetArchive Ar, long validPos)
         {
             base.Deserialize(Ar, validPos);
+
+            if (validPos == Ar.Position)
+                return;
             LODData = Ar.ReadArray(() => new FStaticMeshComponentLODInfo(Ar));
         }
 
