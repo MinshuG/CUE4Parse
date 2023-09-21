@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using CUE4Parse.FileProvider;
 using CUE4Parse.MappingsProvider;
 using CUE4Parse.UE4.Assets.Exports;
@@ -30,13 +31,13 @@ namespace CUE4Parse.UE4.Assets
         public readonly FExportMapEntry[] ExportMap;
         public readonly FBulkDataMapEntry[] BulkDataMap;
 
-        public readonly Lazy<IoPackage?[]> ImportedPackages;
-        public override Lazy<UObject>[] ExportsLazy { get; }
+        public readonly TaskLazy<IoPackage?[]> ImportedPackages;
+        public override TaskLazy<UObject>[] ExportsLazy { get; }
         public override bool IsFullyLoaded { get; }
 
         public IoPackage(
             FArchive uasset, IoGlobalData globalData, FIoContainerHeader? containerHeader = null,
-            Lazy<FArchive?>? ubulk = null, Lazy<FArchive?>? uptnl = null,
+            TaskLazy<FArchive?>? ubulk = null, TaskLazy<FArchive?>? uptnl = null,
             IFileProvider? provider = null, TypeMappings? mappings = null) : base(uasset.Name.SubstringBeforeLast('.'), provider, mappings)
         {
             GlobalData = globalData;
@@ -126,7 +127,7 @@ namespace CUE4Parse.UE4.Assets
                 // Export map
                 uassetAr.Position = summary.ExportMapOffset;
                 ExportMap = uasset.ReadArray(Summary.ExportCount, () => new FExportMapEntry(uassetAr));
-                ExportsLazy = new Lazy<UObject>[Summary.ExportCount];
+                ExportsLazy = new TaskLazy<UObject>[Summary.ExportCount];
 
                 // Export bundle entries
                 uassetAr.Position = summary.ExportBundleEntriesOffset;
@@ -173,7 +174,7 @@ namespace CUE4Parse.UE4.Assets
                 // Export map
                 uassetAr.Position = summary.ExportMapOffset;
                 ExportMap = uasset.ReadArray(Summary.ExportCount, () => new FExportMapEntry(uassetAr));
-                ExportsLazy = new Lazy<UObject>[Summary.ExportCount];
+                ExportsLazy = new TaskLazy<UObject>[Summary.ExportCount];
 
                 // Export bundles
                 uassetAr.Position = summary.ExportBundlesOffset;
@@ -188,15 +189,16 @@ namespace CUE4Parse.UE4.Assets
             }
 
             // Preload dependencies
-            ImportedPackages = new Lazy<IoPackage?[]>(provider != null ? () =>
-            {
+            IoPackage?[] LoadImportedPackages() {
                 var packages = new IoPackage?[importedPackageIds.Length];
-                for (var i = 0; i < importedPackageIds.Length; i++)
-                {
+                for (var i = 0; i < importedPackageIds.Length; i++) {
                     provider.TryLoadPackage(importedPackageIds[i], out packages[i]);
                 }
+
                 return packages;
-            } : Array.Empty<IoPackage?>);
+            }
+
+            ImportedPackages = new TaskLazy<IoPackage?[]>(provider != null ? LoadImportedPackages : Array.Empty<IoPackage?>);
 
             // Attach ubulk and uptnl
             if (ubulk != null) uassetAr.AddPayload(PayloadType.UBULK, Summary.BulkDataStartOffset, ubulk);
@@ -212,7 +214,7 @@ namespace CUE4Parse.UE4.Assets
                     return 0; // Skip ExportCommandType_Create
 
                 var export = ExportMap[entry.LocalExportIndex];
-                ExportsLazy[entry.LocalExportIndex] = new Lazy<UObject>(() =>
+                ExportsLazy[entry.LocalExportIndex] = new TaskLazy<UObject>(() =>
                 {
                     // Create
                     var obj = ConstructObject(ResolveObjectIndex(export.ClassIndex)?.Object?.Value as UStruct);
@@ -256,7 +258,7 @@ namespace CUE4Parse.UE4.Assets
         }
 
         public IoPackage(FArchive uasset, IoGlobalData globalData, FIoContainerHeader? containerHeader = null, FArchive? ubulk = null, FArchive? uptnl = null, IFileProvider? provider = null, TypeMappings? mappings = null)
-            : this(uasset, globalData, containerHeader, ubulk != null ? new Lazy<FArchive?>(() => ubulk) : null, uptnl != null ? new Lazy<FArchive?>(() => uptnl) : null, provider, mappings) { }
+            : this(uasset, globalData, containerHeader, ubulk != null ? new TaskLazy<FArchive?>(() => ubulk) : null, uptnl != null ? new TaskLazy<FArchive?>(() => uptnl) : null, provider, mappings) { }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FName CreateFNameFromMappedName(FMappedName mappedName) =>
@@ -394,7 +396,7 @@ namespace CUE4Parse.UE4.Assets
         public class ResolvedExportObject : ResolvedObject
         {
             public FExportMapEntry ExportMapEntry;
-            public Lazy<UObject> ExportObject;
+            public TaskLazy<UObject> ExportObject;
 
             public ResolvedExportObject(int exportIndex, IoPackage package) : base(package, exportIndex)
             {
@@ -407,7 +409,7 @@ namespace CUE4Parse.UE4.Assets
             public override ResolvedObject Outer => ((IoPackage) Package).ResolveObjectIndex(ExportMapEntry.OuterIndex) ?? new ResolvedLoadedObject((UObject) Package);
             public override ResolvedObject? Class => ((IoPackage) Package).ResolveObjectIndex(ExportMapEntry.ClassIndex);
             public override ResolvedObject? Super => ((IoPackage) Package).ResolveObjectIndex(ExportMapEntry.SuperIndex);
-            public override Lazy<UObject> Object => ExportObject;
+            public override TaskLazy<UObject> Object => ExportObject;
         }
 
         private class ResolvedScriptObject : ResolvedObject
@@ -424,7 +426,7 @@ namespace CUE4Parse.UE4.Assets
             // This means we'll have UScriptStruct's shown as UClass which is wrong.
             // Unfortunately because the mappings format does not distinguish between classes and structs, there's no other way around :(
             public override ResolvedObject Class => new ResolvedLoadedObject(new UScriptClass("Class"));
-            public override Lazy<UObject> Object => new(() => new UScriptClass(Name.Text));
+            public override TaskLazy<UObject> Object => new(() => new UScriptClass(Name.Text));
         }
     }
 }

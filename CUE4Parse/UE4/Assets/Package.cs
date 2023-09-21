@@ -28,11 +28,11 @@ namespace CUE4Parse.UE4.Assets
         public FPackageIndex[][]? DependsMap { get; }
         public FPackageIndex[]? PreloadDependencies { get; }
         public FObjectDataResource[]? DataResourceMap { get; }
-        public override Lazy<UObject>[] ExportsLazy => ExportMap.Select(it => it.ExportObject).ToArray();
+        public override TaskLazy<UObject>[] ExportsLazy => ExportMap.Select(it => it.ExportObject).ToArray();
         public override bool IsFullyLoaded { get; } = false;
         private ExportLoader[] _exportLoaders; // Nonnull if useLazySerialization is false
 
-        public Package(FArchive uasset, FArchive? uexp, Lazy<FArchive?>? ubulk = null, Lazy<FArchive?>? uptnl = null, IFileProvider? provider = null, TypeMappings? mappings = null, bool useLazySerialization = true)
+        public Package(FArchive uasset, FArchive? uexp, TaskLazy<FArchive?>? ubulk = null, TaskLazy<FArchive?>? uptnl = null, IFileProvider? provider = null, TypeMappings? mappings = null, bool useLazySerialization = true)
             : base(uasset.Name.SubstringBeforeLast('.'), provider, mappings)
         {
             // We clone the version container because it can be modified with package specific versions when reading the summary
@@ -112,7 +112,7 @@ namespace CUE4Parse.UE4.Assets
             {
                 foreach (var export in ExportMap)
                 {
-                    export.ExportObject = new Lazy<UObject>(() =>
+                    export.ExportObject = new TaskLazy<UObject>(() =>
                     {
                         // Create
                         var obj = ConstructObject(ResolvePackageIndex(export.ClassIndex)?.Object?.Value as UStruct);
@@ -147,8 +147,8 @@ namespace CUE4Parse.UE4.Assets
 
         public Package(FArchive uasset, FArchive? uexp, FArchive? ubulk = null, FArchive? uptnl = null,
             IFileProvider? provider = null, TypeMappings? mappings = null, bool useLazySerialization = true)
-            : this(uasset, uexp, ubulk != null ? new Lazy<FArchive?>(() => ubulk) : null,
-                uptnl != null ? new Lazy<FArchive?>(() => uptnl) : null, provider, mappings, useLazySerialization) { }
+            : this(uasset, uexp, ubulk != null ? new TaskLazy<FArchive?>(() => ubulk) : null,
+                uptnl != null ? new TaskLazy<FArchive?>(() => uptnl) : null, provider, mappings, useLazySerialization) { }
 
         public Package(string name, byte[] uasset, byte[]? uexp, byte[]? ubulk = null, byte[]? uptnl = null, IFileProvider? provider = null, bool useLazySerialization = true)
             : this(new FByteArchive($"{name}.uasset", uasset), uexp != null ? new FByteArchive($"{name}.uexp", uexp) : null,
@@ -266,7 +266,7 @@ namespace CUE4Parse.UE4.Assets
             public override ResolvedObject Outer => Package.ResolvePackageIndex(_export.OuterIndex) ?? new ResolvedLoadedObject((UObject) Package);
             public override ResolvedObject? Class => Package.ResolvePackageIndex(_export.ClassIndex);
             public override ResolvedObject? Super => Package.ResolvePackageIndex(_export.SuperIndex);
-            public override Lazy<UObject> Object => _export.ExportObject;
+            public override TaskLazy<UObject> Object => _export.ExportObject;
         }
 
         /** Fallback if we cannot resolve the export in another package */
@@ -282,7 +282,7 @@ namespace CUE4Parse.UE4.Assets
             public override FName Name => _import.ObjectName;
             public override ResolvedObject? Outer => Package.ResolvePackageIndex(_import.OuterIndex);
             public override ResolvedObject Class => new ResolvedLoadedObject(new UScriptClass(_import.ClassName.Text));
-            public override Lazy<UObject>? Object => _import.ClassName.Text == "Class" ? new(() => new UScriptClass(Name.Text)) : null;
+            public override TaskLazy<UObject>? Object => _import.ClassName.Text == "Class" ? new(() => new UScriptClass(Name.Text)) : null;
         }
 
         private class ExportLoader
@@ -293,7 +293,7 @@ namespace CUE4Parse.UE4.Assets
             private UObject _object;
             private List<LoadDependency>? _dependencies;
             private LoadPhase _phase = LoadPhase.Create;
-            public Lazy<UObject> Lazy;
+            public TaskLazy<UObject> Lazy;
 
             public ExportLoader(Package package, FObjectExport export, FAssetArchive archive)
             {

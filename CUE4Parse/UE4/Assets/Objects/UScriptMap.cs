@@ -1,6 +1,8 @@
-﻿using CUE4Parse.UE4.Assets.Readers;
+﻿using System;
+using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Exceptions;
 using System.Collections.Generic;
+using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Objects.Properties;
 using Newtonsoft.Json;
 
@@ -50,6 +52,16 @@ namespace CUE4Parse.UE4.Assets.Objects
                     throw new ParserException(Ar, $"Failed to read {(isReadingValue ? "value" : "key")} for index {i} in map", e);
                 }
             }
+        }
+
+        public TK? GetOrDefault<T, TK>(T key, TK? defaultValue = default) {
+            foreach (var property in Properties) {
+                var keyProp = property.Key.GetValue(typeof(T));
+                if (property.Value != null && keyProp is T cast && key.Equals(cast) && property.Value.GetValue(typeof(TK)) is TK castValue) {
+                    return castValue;
+                }
+            }
+            return defaultValue;
         }
     }
 }

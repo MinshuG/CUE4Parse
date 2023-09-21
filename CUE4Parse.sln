@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CUE4Parse", "CUE4Parse\CUE4
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CUE4Parse-Conversion", "CUE4Parse-Conversion\CUE4Parse-Conversion.csproj", "{EB602A68-2268-4D51-AC75-41E8EDEC95E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CUE4Parse-Extensions", "CUE4Parse-Extensions\CUE4Parse-Extensions.csproj", "{975F9125-B1C6-4C88-B007-01ECDB1D3BEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NativeDLLTest", "NativeDLLTest\NativeDLLTest.csproj", "{DC1C9B74-B436-4AB5-BB65-E8023D43F988}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +29,14 @@ Global
 		{EB602A68-2268-4D51-AC75-41E8EDEC95E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB602A68-2268-4D51-AC75-41E8EDEC95E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB602A68-2268-4D51-AC75-41E8EDEC95E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{975F9125-B1C6-4C88-B007-01ECDB1D3BEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{975F9125-B1C6-4C88-B007-01ECDB1D3BEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{975F9125-B1C6-4C88-B007-01ECDB1D3BEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{975F9125-B1C6-4C88-B007-01ECDB1D3BEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC1C9B74-B436-4AB5-BB65-E8023D43F988}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC1C9B74-B436-4AB5-BB65-E8023D43F988}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC1C9B74-B436-4AB5-BB65-E8023D43F988}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC1C9B74-B436-4AB5-BB65-E8023D43F988}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

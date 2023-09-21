@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -12,6 +13,7 @@ using CUE4Parse.UE4.Exceptions;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Objects.UObject;
 using CUE4Parse.UE4.Versions;
+using CUE4Parse.Utils;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -20,6 +22,7 @@ namespace CUE4Parse.UE4.Assets.Exports
     public interface IPropertyHolder
     {
         public List<FPropertyTag> Properties { get; }
+
     }
 
     [JsonConverter(typeof(UObjectConverter))]
@@ -56,7 +59,24 @@ namespace CUE4Parse.UE4.Assets.Exports
             }
         }
         public virtual string ExportType => Class?.Name ?? GetType().Name;
+#if DEBUG
+        private List<FPropertyTag> PropertiesDebug {
+            get {
+                var allProps = new List<FPropertyTag>();
 
+                var temp = this;
+                while (temp != null) {
+                    foreach (var prop in temp.Properties) {
+                        if (!allProps.Any(x => x.Name == prop.Name))    
+                            allProps.Add(prop);
+                    }
+
+                    temp = temp.Template?.Object?.Value;
+                }
+
+                return allProps;
+            } }
+#endif
         public UObject()
         {
             Properties = new List<FPropertyTag>();
@@ -85,7 +105,7 @@ namespace CUE4Parse.UE4.Assets.Exports
                 ObjectGuid = Ar.Read<FGuid>();
             }
 
-            if (Ar.Game >= EGame.GAME_UE5_0 && Flags.HasFlag(EObjectFlags.RF_ClassDefaultObject) || Flags.HasFlag(EObjectFlags.RF_ArchetypeObject))
+            if (Ar.Game >= EGame.GAME_UE5_0 && (Flags.HasFlag(EObjectFlags.RF_ClassDefaultObject) || Flags.HasFlag(EObjectFlags.RF_DefaultSubObject)))
             {
                 Ar.Position += 4; // No idea honestly
             }
@@ -315,13 +335,13 @@ namespace CUE4Parse.UE4.Assets.Exports
         public T GetOrDefault<T>(string name, T defaultValue = default, StringComparison comparisonType = StringComparison.Ordinal) =>
             PropertyUtil.GetOrDefault(this, name, defaultValue, comparisonType);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Lazy<T> GetOrDefaultLazy<T>(string name, T defaultValue = default, StringComparison comparisonType = StringComparison.Ordinal) =>
+        public TaskLazy<T> GetOrDefaultLazy<T>(string name, T defaultValue = default, StringComparison comparisonType = StringComparison.Ordinal) =>
             PropertyUtil.GetOrDefaultLazy(this, name, defaultValue, comparisonType);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get<T>(string name, StringComparison comparisonType = StringComparison.Ordinal) =>
             PropertyUtil.Get<T>(this, name, comparisonType);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Lazy<T> GetLazy<T>(string name, StringComparison comparisonType = StringComparison.Ordinal) =>
+        public TaskLazy<T> GetLazy<T>(string name, StringComparison comparisonType = StringComparison.Ordinal) =>
             PropertyUtil.GetLazy<T>(this, name, comparisonType);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T GetByIndex<T>(int index) => PropertyUtil.GetByIndex<T>(this, index);
@@ -458,7 +478,7 @@ namespace CUE4Parse.UE4.Assets.Exports
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Lazy<T> GetOrDefaultLazy<T>(IPropertyHolder holder, string name, T defaultValue = default,
+        public static TaskLazy<T> GetOrDefaultLazy<T>(IPropertyHolder holder, string name, T defaultValue = default,
             StringComparison comparisonType = StringComparison.Ordinal) =>
             new(() => GetOrDefault(holder, name, defaultValue, comparisonType));
 
@@ -479,7 +499,7 @@ namespace CUE4Parse.UE4.Assets.Exports
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Lazy<T> GetLazy<T>(IPropertyHolder holder, string name,
+        public static TaskLazy<T> GetLazy<T>(IPropertyHolder holder, string name,
             StringComparison comparisonType = StringComparison.Ordinal) =>
             new(() => Get<T>(holder, name, comparisonType));
 

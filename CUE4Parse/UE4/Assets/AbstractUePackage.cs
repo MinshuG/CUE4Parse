@@ -10,6 +10,7 @@ using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Exceptions;
 using CUE4Parse.UE4.Objects.UObject;
+using CUE4Parse.Utils;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -21,7 +22,7 @@ namespace CUE4Parse.UE4.Assets
         public TypeMappings? Mappings { get; }
         public abstract FPackageFileSummary Summary { get; }
         public abstract FNameEntrySerialized[] NameMap { get; }
-        public abstract Lazy<UObject>[] ExportsLazy { get; }
+        public abstract TaskLazy<UObject>[] ExportsLazy { get; }
         public abstract bool IsFullyLoaded { get; }
 
         public override bool IsNameStableForNetworking() => true;   // For now, assume all packages have stable net names
@@ -146,7 +147,7 @@ namespace CUE4Parse.UE4.Assets
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<UObject> GetExports() => ExportsLazy.Select(x => x.Value);
 
-        public Lazy<UObject>? FindObject(FPackageIndex? index)
+        public TaskLazy<UObject>? FindObject(FPackageIndex? index)
         {
             if (index == null || index.IsNull) return null;
             if (index.IsImport) return ResolvePackageIndex(index)?.Object;
@@ -174,7 +175,7 @@ namespace CUE4Parse.UE4.Assets
         public virtual ResolvedObject? Outer => null;
         public virtual ResolvedObject? Class => null;
         public virtual ResolvedObject? Super => null;
-        public virtual Lazy<UObject>? Object => null;
+        public virtual TaskLazy<UObject>? Object => null;
 
         public string GetFullName(bool includeOuterMostName = true, bool includeClassPackage = false)
         {
@@ -294,6 +295,6 @@ namespace CUE4Parse.UE4.Assets
             }
         }
         public override ResolvedObject? Super => null; //new ResolvedLoadedObject(_object.Super);
-        public override Lazy<UObject> Object => new(() => _object);
+        public override TaskLazy<UObject> Object => new(() => _object);
     }
 }

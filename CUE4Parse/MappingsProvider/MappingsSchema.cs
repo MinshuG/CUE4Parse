@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using CUE4Parse.UE4.Objects.UObject;
+using CUE4Parse.Utils;
 using Serilog;
 
 namespace CUE4Parse.MappingsProvider
@@ -11,7 +12,7 @@ namespace CUE4Parse.MappingsProvider
         public readonly TypeMappings? Context;
         public string Name;
         public string? SuperType;
-        public Lazy<Struct?> Super;
+        public TaskLazy<Struct?> Super;
         public Dictionary<int, PropertyInfo> Properties;
         public int PropertyCount;
 
@@ -25,7 +26,7 @@ namespace CUE4Parse.MappingsProvider
         public Struct(TypeMappings? context, string name, string? superType, Dictionary<int, PropertyInfo> properties, int propertyCount) : this(context, name, propertyCount)
         {
             SuperType = superType;
-            Super = new Lazy<Struct?>(() =>
+            Super = new TaskLazy<Struct?>(() =>
             {
                 if (SuperType != null && Context != null && Context.Types.TryGetValue(SuperType, out var superStruct))
                 {
@@ -47,13 +48,19 @@ namespace CUE4Parse.MappingsProvider
 
             return true;
         }
+
+        public PropertyInfo? GetValue(int i) {
+            if (TryGetValue(i, out var info))
+                return info;
+            return null;
+        }
     }
 
     public class SerializedStruct : Struct
     {
         public SerializedStruct(TypeMappings? context, UStruct struc) : base(context, struc.Name, struc.ChildProperties.Length)
         {
-            Super = new Lazy<Struct?>(() =>
+            Super = new TaskLazy<Struct?>(() =>
             {
                 //if (struc.SuperStruct.TryLoad<UStruct>(out var superStruct))
                 var superStruct = struc.SuperStruct.Load<UStruct>();

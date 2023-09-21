@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.IO;
+using System.Runtime.InteropServices;
 using CUE4Parse.UE4.Readers;
 using CUE4Parse.UE4.Versions;
 
@@ -37,14 +38,14 @@ namespace CUE4Parse.UE4.Objects.Core.Math
                 Z = (float) Ar.Read<double>();
                 W = (float) Ar.Read<double>();
             }
-            else
-            {
-                X = Ar.Read<float>();
-                Y = Ar.Read<float>();
-                Z = Ar.Read<float>();
-                W = Ar.Read<float>();
+            else {
+                this = ReadFVector4Float(Ar);
             }
         }
+
+        public static FVector4 ReadFVector4Float(FArchive Ar) => new FVector4(Ar.Read<float>(), Ar.Read<float>(), Ar.Read<float>(), Ar.Read<float>());
+
+        public static FVector4 ReadFVector4Double(FArchive Ar) => new FVector4((float)Ar.Read<double>(), (float)Ar.Read<double>(), (float)Ar.Read<double>(), (float)Ar.Read<double>());
 
         /// <summary>
         /// Constructor from 3D Vector and W

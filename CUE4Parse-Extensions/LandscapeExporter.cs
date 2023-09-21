@@ -305,7 +305,7 @@ public class LandscapeExporter : PSKExporter
         landscapeLod.ExtraVertexColors = ExtraVertexColorMap.Values.ToArray();
         ExtraVertexColorMap.Clear();
         var mat = _landscapeMaterial.Load<UMaterialInterface>();
-        landscapeLod.Sections = new Lazy<CMeshSection[]>(new[]
+        landscapeLod.Sections = new TaskLazy<CMeshSection[]>(new[]
         {
             new CMeshSection(0, 0, TriangleCount, mat?.Name ?? "DefaultMaterial", _landscapeMaterial.ResolvedObject)
         });
@@ -356,7 +356,7 @@ public class LandscapeExporter : PSKExporter
             }
         }
 
-        landscapeLod.Indices = new Lazy<FRawStaticIndexBuffer>(new FRawStaticIndexBuffer(meshIndices.ToArray()));
+        landscapeLod.Indices = new TaskLazy<FRawStaticIndexBuffer>(new FRawStaticIndexBuffer(meshIndices.ToArray()));
         meshIndices.Clear();
         // var staticMesh = new CStaticMesh();
         // staticMesh.LODs.Add(landscapeLod);

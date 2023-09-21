@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Objects.RenderCore;
+using CUE4Parse.Utils;
 
 namespace CUE4Parse_Conversion.Meshes.PSK
 {
@@ -11,13 +12,13 @@ namespace CUE4Parse_Conversion.Meshes.PSK
         public List<FVector> Normals;
         public List<uint> ExtraInfos;
         public List<int> WedgeToVert;
-        public Lazy<int[]> VertToWedge;
+        public TaskLazy<int[]> VertToWedge;
         public int WedgeIndex;
         public FVector Mins;
         public FVector Maxs;
-        public Lazy<FVector> Extents;
+        public TaskLazy<FVector> Extents;
         public int[] Hash;
-        public Lazy<int[]> HashNext;
+        public TaskLazy<int[]> HashNext;
 
         public void Prepare(CMeshVertex[] verts)
         {
@@ -28,7 +29,7 @@ namespace CUE4Parse_Conversion.Meshes.PSK
             Normals = new List<FVector>();
             ExtraInfos = new List<uint>();
             WedgeToVert = new List<int>();
-            VertToWedge = new Lazy<int[]>(new int[numVerts]);
+            VertToWedge = new TaskLazy<int[]>(new int[numVerts]);
 
             ComputeBounds(verts);
 
@@ -36,7 +37,7 @@ namespace CUE4Parse_Conversion.Meshes.PSK
             extents[0] += 1f;
             extents[1] += 1f;
             extents[2] += 1f;
-            Extents = new Lazy<FVector>(extents);
+            Extents = new TaskLazy<FVector>(extents);
 
             Hash = new int[Constants.MESH_HASH_SIZE];
             for (var i = 0; i < Hash.Length; i++)
@@ -44,7 +45,7 @@ namespace CUE4Parse_Conversion.Meshes.PSK
                 Hash[i] = -1;
             }
 
-            HashNext = new Lazy<int[]>(() =>
+            HashNext = new TaskLazy<int[]>(() =>
             {
                 var ret = new int[numVerts];
                 for (var i = 0; i < ret.Length; i++)

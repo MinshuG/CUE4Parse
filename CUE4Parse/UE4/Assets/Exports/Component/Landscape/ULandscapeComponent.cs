@@ -5,6 +5,7 @@ using CUE4Parse.UE4.Assets.Objects;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Objects.UObject;
+using CUE4Parse.Utils;
 
 namespace CUE4Parse.UE4.Assets.Exports.Component.Landscape;
 
@@ -20,7 +21,7 @@ public class ULandscapeComponent: UPrimitiveComponent
     public float WeightmapSubsectionOffset;
     public FWeightmapLayerAllocationInfo[] WeightmapLayerAllocations;
     
-    public Lazy<UTexture2D[]> WeightmapTextures;
+    public TaskLazy<UTexture2D[]> WeightmapTextures;
 
     public override void Deserialize(FAssetArchive Ar, long validPos)
     {
@@ -36,7 +37,7 @@ public class ULandscapeComponent: UPrimitiveComponent
         WeightmapLayerAllocations = GetOrDefault(nameof(WeightmapLayerAllocations), Array.Empty<FWeightmapLayerAllocationInfo>());
         // throw new NotImplementedException();
         WeightmapTextures =
-            new Lazy<UTexture2D[]>(() => GetOrDefault<UTexture2D[]>("WeightmapTextures", Array.Empty<UTexture2D>()));
+            new TaskLazy<UTexture2D[]>(() => GetOrDefault<UTexture2D[]>("WeightmapTextures", Array.Empty<UTexture2D>()));
     }
 
     public void GetComponentExtent(ref int minX, ref int minY, ref int maxX, ref int maxY)

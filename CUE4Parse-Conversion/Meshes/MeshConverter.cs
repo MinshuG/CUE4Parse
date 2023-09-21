@@ -8,6 +8,7 @@ using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Objects.Meshes;
 using CUE4Parse.UE4.Objects.RenderCore;
 using CUE4Parse_Conversion.Meshes.PSK;
+using CUE4Parse.Utils;
 
 namespace CUE4Parse_Conversion.Meshes
 {
@@ -65,8 +66,8 @@ namespace CUE4Parse_Conversion.Meshes
                     HasNormals = true,
                     HasTangents = true,
                     IsTwoSided = srcLod.CardRepresentationData?.bMostlyTwoSided ?? false,
-                    Indices = new Lazy<FRawStaticIndexBuffer>(srcLod.IndexBuffer!),
-                    Sections = new Lazy<CMeshSection[]>(() =>
+                    Indices = new TaskLazy<FRawStaticIndexBuffer>(srcLod.IndexBuffer!),
+                    Sections = new TaskLazy<CMeshSection[]>(() =>
                     {
                         var sections = new CMeshSection[srcLod.Sections.Length];
                         for (var j = 0; j < sections.Length; j++)
@@ -144,11 +145,11 @@ namespace CUE4Parse_Conversion.Meshes
                     NumTexCoords = numTexCoords,
                     HasNormals = true,
                     HasTangents = true,
-                    Indices = new Lazy<FRawStaticIndexBuffer>(() => new FRawStaticIndexBuffer
+                    Indices = new TaskLazy<FRawStaticIndexBuffer>(() => new FRawStaticIndexBuffer
                     {
                         Indices16 = srcLod.Indices.Indices16, Indices32 = srcLod.Indices.Indices32
                     }),
-                    Sections = new Lazy<CMeshSection[]>(() =>
+                    Sections = new TaskLazy<CMeshSection[]>(() =>
                     {
                         var sections = new CMeshSection[srcLod.Sections.Length];
                         for (var j = 0; j < sections.Length; j++)

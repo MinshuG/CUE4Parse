@@ -4,6 +4,7 @@ using CUE4Parse.FileProvider;
 using CUE4Parse.MappingsProvider;
 using CUE4Parse.UE4.Assets.Exports;
 using CUE4Parse.UE4.Objects.UObject;
+using CUE4Parse.Utils;
 
 namespace CUE4Parse.UE4.Assets
 {
@@ -16,7 +17,7 @@ namespace CUE4Parse.UE4.Assets
 
         public FPackageFileSummary Summary { get; }
         public FNameEntrySerialized[] NameMap { get; }
-        public Lazy<UObject>[] ExportsLazy { get; }
+        public TaskLazy<UObject>[] ExportsLazy { get; }
 
         public abstract bool IsFullyLoaded { get; }
 
@@ -27,7 +28,7 @@ namespace CUE4Parse.UE4.Assets
         public T? GetExportOrNull<T>(string name, StringComparison comparisonType = StringComparison.Ordinal) where T : UObject;
         public UObject GetExport(string name, StringComparison comparisonType = StringComparison.Ordinal);
         public T GetExport<T>(string name, StringComparison comparisonType = StringComparison.Ordinal) where T : UObject;
-        public Lazy<UObject>? FindObject(FPackageIndex? index);
+        public TaskLazy<UObject>? FindObject(FPackageIndex? index);
         public ResolvedObject? ResolvePackageIndex(FPackageIndex? index);
         public UObject? GetExport(int index);
         public IEnumerable<UObject> GetExports();

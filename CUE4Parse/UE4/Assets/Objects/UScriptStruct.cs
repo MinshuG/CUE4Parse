@@ -31,6 +31,7 @@ namespace CUE4Parse.UE4.Assets.Objects
         public readonly IUStruct StructType;
 
         public UScriptStruct(FAssetArchive Ar, string? structName, UStruct? struc, ReadType? type)
+            // ReSharper disable once ConvertToPrimaryConstructor
         {
             StructType = structName switch
             {
@@ -106,10 +107,10 @@ namespace CUE4Parse.UE4.Assets.Objects
                 "Vector2D" => type == ReadType.ZERO ? new FVector2D() : new FVector2D(Ar),
                 "Vector2f" => type == ReadType.ZERO ? new TIntVector2<float>() : Ar.Read<TIntVector2<float>>(),
                 "DeprecateSlateVector2D" => type == ReadType.ZERO ? new FVector2D() : Ar.Read<FVector2D>(),
-                "Vector3f" => type == ReadType.ZERO ? new TIntVector3<float>() : Ar.Read<TIntVector3<float>>(),
-                "Vector3d" => type == ReadType.ZERO ? new TIntVector3<double>() : Ar.Read<TIntVector3<double>>(),
+                "Vector3f" => type == ReadType.ZERO ? new FVector() : FVector.ReadFVectorFloat(Ar),
+                "Vector3d" => type == ReadType.ZERO ? new FVector() : FVector.ReadFVectorDouble(Ar),
                 "Vector4" => type == ReadType.ZERO ? new FVector4() : new FVector4(Ar),
-                "Vector4f" => type == ReadType.ZERO ? new TIntVector4<float>() : Ar.Read<TIntVector4<float>>(),
+                "Vector4f" => type == ReadType.ZERO ? new FVector4() : FVector.ReadFVectorFloat(Ar),
                 "Vector_NetQuantize" => type == ReadType.ZERO ? new FVector() : new FVector(Ar),
                 "Vector_NetQuantize10" => type == ReadType.ZERO ? new FVector() : new FVector(Ar),
                 "Vector_NetQuantize100" => type == ReadType.ZERO ? new FVector() : new FVector(Ar),
@@ -122,6 +123,7 @@ namespace CUE4Parse.UE4.Assets.Objects
 
                 // FortniteGame
                 "ConnectivityCube" => new FConnectivityCube(Ar),
+                // "GameplayEventFunction" => new FGameplayEventFunction(Ar),
                 //"FortActorRecord" => new FFortActorRecord(Ar),
 
                 // Train Sim World

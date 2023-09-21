@@ -7,13 +7,14 @@ using CUE4Parse.UE4.Assets.Utils;
 using CUE4Parse.UE4.Exceptions;
 using CUE4Parse.UE4.Objects.UObject;
 using CUE4Parse.UE4.Readers;
+using CUE4Parse.Utils;
 using Serilog;
 
 namespace CUE4Parse.UE4.Assets.Readers
 {
     public class FAssetArchive : FArchive
     {
-        private readonly Dictionary<PayloadType, Lazy<FAssetArchive?>> _payloads;
+        private readonly Dictionary<PayloadType, TaskLazy<FAssetArchive?>> _payloads;
         private readonly FArchive _baseArchive;
 
         public readonly IPackage? Owner;
@@ -22,9 +23,9 @@ namespace CUE4Parse.UE4.Assets.Readers
         public bool HasUnversionedProperties => Owner?.HasFlags(EPackageFlags.PKG_UnversionedProperties) ?? false;
         public bool IsFilterEditorOnly => Owner?.HasFlags(EPackageFlags.PKG_FilterEditorOnly) ?? false;
 
-        public FAssetArchive(FArchive baseArchive, IPackage? owner, int absoluteOffset = 0, Dictionary<PayloadType, Lazy<FAssetArchive?>>? payloads = null) : base(baseArchive.Versions)
+        public FAssetArchive(FArchive baseArchive, IPackage? owner, int absoluteOffset = 0, Dictionary<PayloadType, TaskLazy<FAssetArchive?>>? payloads = null) : base(baseArchive.Versions)
         {
-            _payloads = payloads ?? new Dictionary<PayloadType, Lazy<FAssetArchive?>>();
+            _payloads = payloads ?? new Dictionary<PayloadType, TaskLazy<FAssetArchive?>>();
             _baseArchive = baseArchive;
             Owner = owner;
             AbsoluteOffset = absoluteOffset;
@@ -45,11 +46,11 @@ namespace CUE4Parse.UE4.Assets.Readers
         }
 
         // TODO not really optimal, there should be TryReadObject functions etc
-        public virtual Lazy<T?> ReadObject<T>() where T : UObject
+        public virtual TaskLazy<T?> ReadObject<T>() where T : UObject
         {
             var index = new FPackageIndex(this);
             var resolved = index.ResolvedObject;
-            return new Lazy<T?>(() =>
+            return new TaskLazy<T?>(() =>
             {
                 if (resolved == null)
                 {
@@ -109,29 +110,29 @@ namespace CUE4Parse.UE4.Assets.Readers
                 throw new ParserException(this, $"Can't add a payload that is already attached of type {type}");
             }
 
-            _payloads[type] = new Lazy<FAssetArchive?>(() => payload);
+            _payloads[type] = new TaskLazy<FAssetArchive?>(() => payload);
         }
 
-        public void AddPayload(PayloadType type, int absoluteOffset, Lazy<FArchive?> payload)
+        public void AddPayload(PayloadType type, int absoluteOffset, TaskLazy<FArchive?> payload)
         {
             if (_payloads.ContainsKey(type))
             {
                 throw new ParserException(this, $"Can't add a payload that is already attached of type {type}");
             }
 
-            _payloads[type] = new Lazy<FAssetArchive?>(() =>
+            _payloads[type] = new TaskLazy<FAssetArchive?>(() =>
             {
                 var rawAr = payload.Value;
                 return rawAr == null ? null : new FAssetArchive(rawAr, Owner, absoluteOffset);
             });
         }
         
-        private Dictionary<PayloadType, Lazy<FAssetArchive?>> ClonePayloads()
+        private Dictionary<PayloadType, TaskLazy<FAssetArchive?>> ClonePayloads()
         {
-            var payloads = new Dictionary<PayloadType, Lazy<FAssetArchive?>>();
+            var payloads = new Dictionary<PayloadType, TaskLazy<FAssetArchive?>>();
             foreach (var (type, payload) in _payloads)
             {
-                payloads[type] = new Lazy<FAssetArchive?>(() => (FAssetArchive)payload.Value?.Clone()!);
+                payloads[type] = new TaskLazy<FAssetArchive?>(() => (FAssetArchive)payload.Value?.Clone()!);
             }
             return payloads;
         }

@@ -590,8 +590,8 @@ namespace CUE4Parse.FileProvider
             Files.TryGetValue(file.PathWithoutExtension + ".uptnl", out var uptnlFile);
             var uassetTask = file.TryCreateReaderAsync().ConfigureAwait(false);
             var uexpTask = uexpFile?.TryCreateReaderAsync().ConfigureAwait(false);
-            var lazyUbulk = ubulkFile != null ? new Lazy<FArchive?>(() => ubulkFile.TryCreateReader(out var reader) ? reader : null) : null;
-            var lazyUptnl = uptnlFile != null ? new Lazy<FArchive?>(() => uptnlFile.TryCreateReader(out var reader) ? reader : null) : null;
+            var lazyUbulk = ubulkFile != null ? new TaskLazy<FArchive?>(() => ubulkFile.TryCreateReader(out var reader) ? reader : null) : null;
+            var lazyUptnl = uptnlFile != null ? new TaskLazy<FArchive?>(() => uptnlFile.TryCreateReader(out var reader) ? reader : null) : null;
             var uasset = await uassetTask;
             if (uasset == null)
                 return null;

@@ -54,17 +54,16 @@ namespace CUE4Parse.UE4.Objects.Core.Math
         {
             if (Ar.Ver >= EUnrealEngineObjectUE5Version.LARGE_WORLD_COORDINATES)
             {
-                X = (float) Ar.Read<double>();
-                Y = (float) Ar.Read<double>();
-                Z = (float) Ar.Read<double>();
+                this = ReadFVectorDouble(Ar);
             }
-            else
-            {
-                X = Ar.Read<float>();
-                Y = Ar.Read<float>();
-                Z = Ar.Read<float>();
+            else {
+                this = ReadFVectorFloat(Ar);
             }
         }
+
+        public static FVector ReadFVectorFloat(FArchive Ar) => new FVector(Ar.Read<float>(), Ar.Read<float>(), Ar.Read<float>());
+
+        public static FVector ReadFVectorDouble(FArchive Ar) => new FVector((float)Ar.Read<double>(), (float)Ar.Read<double>(), (float)Ar.Read<double>());
 
         /// <summary>
         /// Constructor initializing all components to a single float value.

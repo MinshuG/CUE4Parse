@@ -2,6 +2,7 @@
 using CUE4Parse.UE4.Assets.Exports.StaticMesh;
 using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Objects.Meshes;
+using CUE4Parse.Utils;
 
 namespace CUE4Parse_Conversion.Meshes.PSK
 {
@@ -23,16 +24,16 @@ namespace CUE4Parse_Conversion.Meshes.PSK
         public bool HasNormals = false;
         public bool HasTangents = false;
         public bool IsTwoSided = false;
-        public Lazy<CMeshSection[]> Sections;
-        public Lazy<FMeshUVFloat[][]> ExtraUV;
+        public TaskLazy<CMeshSection[]> Sections;
+        public TaskLazy<FMeshUVFloat[][]> ExtraUV;
         public FColor[]? VertexColors;
         public CVertexColor[]? ExtraVertexColors;
-        public Lazy<FRawStaticIndexBuffer>? Indices;
+        public TaskLazy<FRawStaticIndexBuffer>? Indices;
         public bool SkipLod => Sections.Value.Length < 1 || Indices?.Value == null;
 
         public void AllocateUVBuffers()
         {
-            ExtraUV = new Lazy<FMeshUVFloat[][]>(() =>
+            ExtraUV = new TaskLazy<FMeshUVFloat[][]>(() =>
             {
                 FMeshUVFloat[][] ret;
                 if (NumTexCoords > 0)

@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using CUE4Parse.UE4.Objects.UObject;
 using CUE4Parse.UE4.Readers;
+using CUE4Parse.Utils;
 
 namespace CUE4Parse.UE4.Assets.Readers
 {
@@ -63,10 +64,10 @@ namespace CUE4Parse.UE4.Assets.Readers
 
         public override FName ReadFName() => ReadFString();
 
-        public override Lazy<T?> ReadObject<T>() where T : class
+        public override TaskLazy<T?> ReadObject<T>() where T : class
         {
             var path = ReadFString();
-            return new Lazy<T?>(() =>
+            return new TaskLazy<T?>(() =>
             {
                 Debug.Assert(Owner.Provider != null, "Owner.Provider != null");
                 return Owner.Provider.TryLoadObject<T>(path, out var obj) ? obj : null;

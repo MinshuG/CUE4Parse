@@ -227,7 +227,8 @@ namespace CUE4Parse.GameTypes.FN.Assets.Exports
             }
         }
     }
-
+    
+    [StructFallback]
     public class FActorInstanceRecord
     {
         public ulong RecordID;
@@ -265,6 +266,14 @@ namespace CUE4Parse.GameTypes.FN.Assets.Exports
             }
 
             Transform = new FTransform(Ar);
+        }
+
+        public FActorInstanceRecord(FStructFallback structFallback) {
+            RecordID = structFallback.GetOrDefault<ulong>(nameof(RecordID));
+            TemplateRecordID = structFallback.GetOrDefault<ulong>(nameof(TemplateRecordID));
+            ActorId = structFallback.GetOrDefault<FName>(nameof(ActorId));
+            ActorGuid = structFallback.GetOrDefault<FGuid>(nameof(ActorGuid));
+            Transform = structFallback.GetOrDefault<FTransform>(nameof(Transform), FTransform.Identity);
         }
     }
 

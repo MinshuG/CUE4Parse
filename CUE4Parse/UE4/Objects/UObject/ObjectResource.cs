@@ -6,6 +6,7 @@ using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Exceptions;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
+using CUE4Parse.Utils;
 using Newtonsoft.Json;
 using UExport = CUE4Parse.UE4.Assets.Exports.UObject;
 
@@ -39,21 +40,21 @@ namespace CUE4Parse.UE4.Objects.UObject
         public bool IsExport => Index > 0;
         public bool IsImport => Index < 0;
         // ResolvedObject?.Name.Text ?? "None"
-        private Lazy<string> _name;
+        private TaskLazy<string> _name;
         public string Name => _name.Value;
 
         public FPackageIndex(FAssetArchive Ar, int index)
         {
             Index = index;
             Owner = Ar.Owner;
-            _name = new Lazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
+            _name = new TaskLazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
         }
 
         public FPackageIndex(FAssetArchive Ar)
         {
             Index = Ar.Read<int>();
             Owner = Ar.Owner;
-            _name = new Lazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
+            _name = new TaskLazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
         }
 
         public FPackageIndex(FKismetArchive Ar)
@@ -61,14 +62,14 @@ namespace CUE4Parse.UE4.Objects.UObject
             Index = Ar.Read<int>();
             Owner = Ar.Owner;
             Ar.Index += 4;
-            _name = new Lazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
+            _name = new TaskLazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
         }
 
         public FPackageIndex()
         {
             Index = 0;
             Owner = null;
-            _name = new Lazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
+            _name = new TaskLazy<string>(new Func<string>(() => ResolvedObject?.Name.Text ?? "None"));
         }
 
         public override string ToString()
@@ -189,7 +190,7 @@ namespace CUE4Parse.UE4.Objects.UObject
         public int CreateBeforeSerializationDependencies;
         public int SerializationBeforeCreateDependencies;
         public int CreateBeforeCreateDependencies;
-        public Lazy<UExport> ExportObject;
+        public TaskLazy<UExport> ExportObject;
 
         public string ClassName;
 
