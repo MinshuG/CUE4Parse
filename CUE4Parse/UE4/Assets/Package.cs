@@ -189,7 +189,7 @@ namespace CUE4Parse.UE4.Assets
             while (true)
             {
                 outerMostImport = ImportMap[-outerMostIndex.Index - 1];
-                if (outerMostImport.OuterIndex.IsNull)
+                if (outerMostImport.OuterIndex.IsNull || outerMostImport.OuterIndex.IsExport)
                     break;
                 outerMostIndex = outerMostImport.OuterIndex;
             }
