@@ -123,7 +123,7 @@ namespace CUE4Parse.UE4.Assets.Objects
 
                 // FortniteGame
                 "ConnectivityCube" => new FConnectivityCube(Ar),
-                // "GameplayEventFunction" => new FGameplayEventFunction(Ar),
+                "GameplayEventFunction" => new FGameplayEventFunction(Ar),
                 //"FortActorRecord" => new FFortActorRecord(Ar),
 
                 // Train Sim World

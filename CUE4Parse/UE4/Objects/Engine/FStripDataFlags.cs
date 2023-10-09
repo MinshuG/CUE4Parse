@@ -1,9 +1,11 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using CUE4Parse.UE4.Readers;
 using CUE4Parse.UE4.Versions;
 
 namespace CUE4Parse.UE4.Objects.Engine
 {
+    [DebuggerDisplay("IsEditorDataStripped={(GlobalStripFlags & 1) != 0} IsDataStrippedForServer={(GlobalStripFlags & 2) != 0}")]
     [StructLayout(LayoutKind.Sequential)]
     public struct FStripDataFlags
     {
@@ -26,7 +28,7 @@ namespace CUE4Parse.UE4.Objects.Engine
                 GlobalStripFlags = ClassStripFlags = 0;
             }
         }
-
+        
         public bool IsEditorDataStripped() => (GlobalStripFlags & 1) != 0;
         public bool IsDataStrippedForServer() => (GlobalStripFlags & 2) != 0;
         public bool IsClassDataStripped(byte flag) => (ClassStripFlags & flag) != 0;
