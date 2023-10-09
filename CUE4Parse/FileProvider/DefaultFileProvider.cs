@@ -81,7 +81,7 @@ namespace CUE4Parse.FileProvider
                 if (!GameFile.Ue4KnownExtensions.Contains(upperExt, StringComparer.OrdinalIgnoreCase))                
                     continue;
 
-                var osFile = new OsGameFile(_workingDirectory, file, mountPoint, Versions);
+                var osFile = new OsGameFile(directory, file, mountPoint, Versions);
                 if (IsCaseInsensitive) osFiles[osFile.Path.ToLowerInvariant()] = osFile;
                 else osFiles[osFile.Path] = osFile;
             }
