@@ -62,6 +62,11 @@ namespace CUE4Parse.UE4.Objects.UObject
         };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(FName a, string b) => b == a.Text;
+
+        public static bool operator !=(FName a, string b) => !(a == b);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(FName a, FName b) => !(a == b);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
