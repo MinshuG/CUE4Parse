@@ -9,6 +9,7 @@ using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using CUE4Parse.ACL;
 
 namespace CUE4Parse.Compression
 {
@@ -35,8 +36,16 @@ namespace CUE4Parse.Compression
             DecompressFunc = OodleLZ_Decompress;
         }
 
+        [DllImport(ACLNative.LIB_NAME, CallingConvention = CallingConvention.Cdecl)]
+        public static extern unsafe long OodleLZ_DecompressWrapper(byte* buffer, long bufferSize, byte* output, long outputBufferSize, int a, int b, int c, long d, long e, long f, long g, long h, long i, int threadModule);
+
         public static bool LoadOodleDll(string? path = null)
         {
+            if (CUE4ParseNatives.IsFeatureAvailable("Oodle")) {
+                Log.Debug("Using CUE4Parse-Natives Oodle Wrapper");
+                unsafe { DecompressFunc = OodleLZ_DecompressWrapper; }
+                return true;
+            }
             if (File.Exists(OODLE_DLL_NAME)) return true;
             return DownloadOodleDll(path).GetAwaiter().GetResult();
         }
