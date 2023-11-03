@@ -14,9 +14,10 @@ namespace CUE4Parse_Conversion.Meshes
 {
     public static class MeshConverter
     {
-        public static bool TryConvert(this USkeleton originalSkeleton, out List<CSkelMeshBone> bones)
+        public static bool TryConvert(this USkeleton originalSkeleton, out List<CSkelMeshBone> bones, out FBox box)
         {
             bones = new List<CSkelMeshBone>();
+            box = new FBox();
             for (var i = 0; i < originalSkeleton.ReferenceSkeleton.FinalRefBoneInfo.Length; i++)
             {
                 var skeletalMeshBone = new CSkelMeshBone
@@ -31,6 +32,8 @@ namespace CUE4Parse_Conversion.Meshes
                 //     skeletalMeshBone.Orientation.Conjugate();
 
                 bones.Add(skeletalMeshBone);
+                box.Min = skeletalMeshBone.Position.ComponentMin(box.Min);
+                box.Max = skeletalMeshBone.Position.ComponentMax(box.Max);
             }
             return true;
         }
