@@ -67,7 +67,8 @@ namespace CUE4Parse.UE4.Assets.Exports
                 var temp = this;
                 while (temp != null) {
                     foreach (var prop in temp.Properties) {
-                        if (!allProps.Any(x => x.Name == prop.Name))    
+                        // if any property with the same name is already in the list, skip it
+                        if (allProps.Any(it => it.Name.Text == prop.Name.Text)) continue;
                             allProps.Add(prop);
                     }
 
